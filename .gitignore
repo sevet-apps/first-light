@@ -1,0 +1,9 @@
+.claude/
+_auditions/
+__pycache__/
+*.pyc
+*.blend1
+*.blend@
+/tmp/
+.DS_Store
+Thumbs.db
