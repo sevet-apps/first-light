@@ -12,8 +12,7 @@ html, body {
   color: var(--paper);
   font-family: var(--font-ui);
   line-height: 1.5;
-  font-feature-settings: "tnum" 1, "calt" 1;
-  font-variant-numeric: tabular-nums;
+  font-feature-settings: "calt" 1;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   user-select: none;
@@ -541,3 +540,6 @@ html, body {
   .icon--draw path, .objective__box .icon path { animation: none !important; transition-duration: 1ms !important; }
 }
 .segmented__opt span { text-transform: capitalize; }
+
+/* Tabular numerals only on numeric displays, never on running text (tnum widens hyphens). */
+.stat__num, .meter__value, .row__value, .timeline__eta, .loading__pct, .hud-card__code, .doc__index, .check-row__tag, .tabular { font-feature-settings: "tnum" 1; font-variant-numeric: tabular-nums; }

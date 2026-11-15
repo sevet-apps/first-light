@@ -222,13 +222,13 @@ export function debrief(result, { onRedesign = null, onReplay = null, onMenu = n
   const primaryMet = result.objectives[0].met;
   const row = el('div', 'debrief__stars');
   row.append(stars(result.objectives.map((o) => o.met && primaryMet)));
+  if (!primaryMet) row.append(el('p', 'debrief__starnote', 'Stars count once the primary goal is met.'));
   head.append(left, row);
 
   const objectives = el('ol', 'debrief__objectives');
   for (const o of result.objectives) {
-    const earned = o.met && primaryMet;
-    const li = el('li', `debrief__objective${earned ? ' is-earned' : ''}`);
-    li.append(icon(earned ? 'check' : 'close', { draw: true }), el('span', '', o.text));
+    const li = el('li', `debrief__objective${o.met ? ' is-earned' : ''}`);
+    li.append(icon(o.met ? 'check' : 'close', { draw: true }), el('span', '', o.text));
     objectives.append(li);
   }
 
