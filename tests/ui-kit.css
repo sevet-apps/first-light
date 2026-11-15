@@ -1,0 +1,115 @@
+/* UI kit page layout only. Every component below is styled by the game's own css/*.css. */
+
+html, body.kit { height: auto; min-height: 100%; overflow: auto; user-select: text; }
+body.kit { position: relative; }
+
+html, body.kit { background: #07090d; }
+.kit-backdrop {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: -1;
+  background:
+    radial-gradient(1.2px 1.2px at 12% 18%, rgba(241, 236, 226, 0.7), transparent),
+    radial-gradient(1px 1px at 31% 62%, rgba(241, 236, 226, 0.55), transparent),
+    radial-gradient(1.4px 1.4px at 58% 22%, rgba(241, 236, 226, 0.7), transparent),
+    radial-gradient(1px 1px at 77% 71%, rgba(241, 236, 226, 0.5), transparent),
+    radial-gradient(1.2px 1.2px at 90% 36%, rgba(241, 236, 226, 0.6), transparent),
+    radial-gradient(1px 1px at 44% 88%, rgba(241, 236, 226, 0.5), transparent),
+    radial-gradient(ellipse 90% 45% at 50% 118%, rgba(70, 114, 196, 0.42), transparent 66%),
+    radial-gradient(ellipse 45% 30% at 84% 6%, rgba(255, 180, 107, 0.12), transparent 70%),
+    radial-gradient(ellipse at 18% 28%, #131c2b, #07090d 72%);
+  background-size: 420px 420px, 420px 420px, 420px 420px, 420px 420px, 420px 420px, 420px 420px, 100% 1500px, 100% 1500px, 100% 1500px;
+  background-repeat: repeat, repeat, repeat, repeat, repeat, repeat, repeat-y, repeat-y, repeat-y;
+}
+
+.kit-wrap { max-width: 116rem; margin: 0 auto; padding: 3.5rem var(--margin) 7rem; display: flex; flex-direction: column; gap: 5.5rem; }
+
+.kit-hero { display: flex; flex-direction: column; gap: 1.4rem; padding-top: 1rem; }
+.kit-hero .display { font-size: var(--fs-hero); line-height: 0.95; letter-spacing: -0.02em; color: var(--paper); }
+.kit-hero__rule { width: 7rem; height: 2px; background: var(--signal); border-radius: 1px; }
+.kit-hero p { margin: 0; max-width: 44rem; font-size: 1.25rem; line-height: 1.55; color: rgba(241, 236, 226, 0.78); }
+.kit-hero .code { color: rgba(241, 236, 226, 0.7); letter-spacing: 0.18em; text-transform: uppercase; }
+
+.kit-section { display: flex; flex-direction: column; gap: 1.8rem; }
+.kit-section__head { display: flex; align-items: baseline; gap: 1.4rem; padding-bottom: 0.9rem; border-bottom: 1.5px solid var(--night-line); }
+.kit-section__head .display { color: var(--paper); font-size: clamp(38px, 2.6vw + 12px, 60px); }
+.kit-section__head .label { flex: none; }
+.kit-section__note { margin: -0.6rem 0 0; max-width: 52rem; color: rgba(241, 236, 226, 0.7); line-height: 1.55; }
+
+.kit-row { display: flex; flex-wrap: wrap; gap: 2rem; align-items: flex-start; }
+.kit-docs { display: grid; grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr)); gap: 2rem; align-items: start; }
+.kit-docs > .paper { width: 100%; }
+
+/* controls sheet */
+.sheet { width: 100%; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 3rem 4rem; padding: 2.25rem 2.5rem 2.5rem; }
+.sheet__col { display: flex; flex-direction: column; gap: 2.2rem; min-width: 0; }
+.sheet h3 { margin: 0 0 1rem; }
+.sheet .rule { margin: 0; }
+.btn-grid { display: grid; grid-template-columns: 6.5rem repeat(5, minmax(0, 1fr)); gap: 1rem 0.9rem; align-items: center; }
+.btn-grid .label { color: var(--ink-2); }
+.btn-grid .btn { width: 100%; padding: 0 12px; }
+.btn-grid__rowname { font-weight: 600; }
+.kit-stack { display: flex; flex-direction: column; gap: 1.1rem; }
+.kit-inline { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.4rem; }
+.kit-night { padding: 1.5rem 1.6rem 1.7rem; display: flex; flex-direction: column; gap: 1.3rem; border-radius: 16px; background: rgba(20, 23, 29, 0.92); }
+.kit-night .row__label, .kit-night .row__value { color: var(--paper); }
+.kit-night .slider::-webkit-slider-runnable-track { background: linear-gradient(to right, var(--paper) var(--p), rgba(241, 236, 226, 0.16) var(--p)); }
+.kit-night .slider::-webkit-slider-thumb { background: var(--paper); border-color: var(--night-solid); box-shadow: 0 0 0 1.5px var(--paper); }
+
+/* foundations */
+.swatches { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.9rem; }
+.swatch { display: flex; flex-direction: column; gap: 0.5rem; }
+.swatch__chip { height: 4.2rem; border-radius: var(--r-chip); box-shadow: inset 0 0 0 1px rgba(27, 27, 27, 0.14); }
+.swatch b { font-size: var(--fs-small); }
+.swatch span { font: 500 var(--fs-micro)/1 var(--font-mono); color: var(--ink-2); }
+.specimen { display: flex; flex-direction: column; gap: 1.2rem; }
+.specimen__display { font: 400 clamp(60px, 4vw + 16px, 104px)/0.95 var(--font-display); letter-spacing: -0.02em; }
+.specimen__display em { font-style: italic; }
+.specimen__line { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding-top: 0.9rem; border-top: var(--hair); }
+.specimen__line span { color: var(--ink-2); font-size: var(--fs-small); }
+.specimen__mono { font: 500 1.1rem var(--font-mono); letter-spacing: 0.04em; }
+.icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(6.4rem, 1fr)); gap: 1.4rem 1rem; }
+.icon-cell { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; text-align: center; }
+.icon-cell .icon { width: 2rem; height: 2rem; }
+.icon-cell span { font: 500 var(--fs-micro)/1 var(--font-mono); color: var(--ink-2); }
+
+/* HUD stages: a stand-in for the 3D world */
+.stage {
+  position: relative;
+  min-height: 42rem;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-card), 0 0 0 1px var(--night-line);
+  background:
+    radial-gradient(ellipse 120% 38% at 50% 114%, #6b9be0 0, #2c4f94 32%, rgba(10, 16, 30, 0) 72%),
+    radial-gradient(1.4px 1.4px at 14% 24%, rgba(241, 236, 226, 0.8), transparent),
+    radial-gradient(1px 1px at 63% 12%, rgba(241, 236, 226, 0.6), transparent),
+    radial-gradient(1.2px 1.2px at 81% 44%, rgba(241, 236, 226, 0.7), transparent),
+    radial-gradient(1px 1px at 38% 38%, rgba(241, 236, 226, 0.5), transparent),
+    radial-gradient(ellipse at 70% 30%, #101a2c, #06080c 75%);
+}
+.stage--hangar {
+  background:
+    linear-gradient(to top, rgba(143, 121, 99, 0.55), transparent 32%),
+    radial-gradient(ellipse 40% 70% at 30% 0%, rgba(255, 180, 107, 0.28), transparent 70%),
+    linear-gradient(#10161f, #1c2634 62%, #3a3f46 62.2%, #3a3f46);
+}
+.stage__caption { position: absolute; right: 1.4rem; bottom: 1.2rem; font: 500 var(--fs-micro)/1 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: rgba(241, 236, 226, 0.45); }
+.stage .telemetry { position: absolute; top: var(--margin); left: var(--margin); }
+.stage .timeline { position: absolute; top: var(--margin); right: var(--margin); }
+.stage .mode-bar { position: absolute; bottom: calc(var(--margin) + 7rem); left: 50%; translate: -50% 0; }
+.stage .subtitles { bottom: calc(var(--margin) + 1rem); }
+.stage-sat { position: absolute; left: 50%; top: 44%; width: 5.5rem; height: 3rem; translate: -50% -50%; border-radius: 4px; background: linear-gradient(135deg, #e6bf6a, #a8782a); box-shadow: -3.8rem 0 0 -0.4rem #2c4a85, 3.8rem 0 0 -0.4rem #2c4a85, 0 0 60px rgba(255, 200, 120, 0.25); }
+.stage-controls { display: flex; gap: 0.75rem; align-items: center; }
+.kit-static { display: flex; flex-wrap: wrap; gap: 2rem; align-items: flex-start; }
+.kit-loading { display: flex; }
+.kit-loading .loading__card { width: min(34rem, 100%); }
+.kit-menu .modal { width: min(27rem, 100%); animation: none; }
+.kit-menu--settings .modal { width: min(54rem, 100%); }
+
+@media (max-width: 1100px) {
+  .sheet { grid-template-columns: 1fr; }
+  .btn-grid { grid-template-columns: 5rem repeat(5, minmax(0, 1fr)); }
+  .stage .timeline { display: none; }
+}

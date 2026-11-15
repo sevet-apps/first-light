@@ -25,10 +25,10 @@ state.params.warp = Number(params.get('warp')) || 1;
 state.params.assembly = params.get('assembly');
 if (presets[state.params.assembly]) state.assembly = { ...presets[state.params.assembly] };
 
-const ui = new UI(document.getElementById('ui'), document.getElementById('loading'));
+const audio = new AudioManager(settings, { debug: state.params.debug });
+const ui = new UI(document.getElementById('ui'), document.getElementById('loading'), audio);
 const renderer = new Renderer(document.getElementById('stage'), settings.quality);
 const input = new Input(renderer.canvas, { settings, isSuppressed: () => ui.isModalOpen() });
-const audio = new AudioManager(settings, { debug: state.params.debug });
 const assets = new Assets();
 const ctx = { renderer, input, audio, assets, ui, settings, state };
 const scenes = new SceneManager(ctx);

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { el } from '../core/ui.js';
+import { el, displayTitle, keyCap } from '../core/ui.js';
+import { stagger } from '../ui/motion.js';
 
 const DURATION_S = 3;
 const SKIP_KEYS = ['Space', 'Escape', 'Enter'];
@@ -24,12 +25,14 @@ export default {
     leaving = false;
     ctx.renderer.setView(new THREE.Scene(), new THREE.PerspectiveCamera());
 
-    screen = ctx.ui.screen('screen--interactive');
+    screen = ctx.ui.screen('on-dark', true);
     screen.style.cursor = 'pointer';
-    screen.append(
-      el('h2', 'card-title', 'INTRO FILM — coming in T5'),
-      el('p', 'hint', 'Click, Space or Esc to skip'),
-    );
+    const centre = el('div', 'intro__centre');
+    centre.append(displayTitle('Intro Film', { tag: 'h2', className: 'intro__title' }), el('p', 'intro__sub', 'Coming in a later ticket'));
+    stagger(centre);
+    const skip = el('div', 'night hint-chip intro__skip enter');
+    skip.append(keyCap('Space', { night: true }), el('span', '', 'or'), keyCap('Esc', { night: true }), el('span', '', 'to skip'));
+    screen.append(centre, skip);
     screen.addEventListener('click', leave);
   },
 

@@ -3,7 +3,9 @@ import { createStarfield } from './shared/starfield.js';
 
 export default createPlaceholderScene({
   id: 'debrief',
-  title: 'Mission debrief',
+  title: 'Mission Debrief',
+  code: 'FL-DOC-005',
+  index: '05 / 05',
   blurb: 'Placeholder: results, stars and the reasons behind them arrive in a later ticket.',
   actions: [
     { label: 'Redesign', kind: 'primary', to: 'hangar' },

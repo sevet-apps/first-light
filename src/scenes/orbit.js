@@ -4,7 +4,9 @@ import { createStarfield } from './shared/starfield.js';
 
 export default createPlaceholderScene({
   id: 'orbit',
-  title: 'Orbit operations',
+  title: 'Orbit Operations',
+  code: 'FL-DOC-004',
+  index: '04 / 05',
   blurb: 'Placeholder: mode control, orbit simulation and telemetry arrive in a later ticket.',
   actions: [{ label: 'Continue to debrief', kind: 'primary', to: 'debrief' }],
   pausable: true,

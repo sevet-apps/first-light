@@ -1,0 +1,93 @@
+/* FIRST LIGHT - composite documents: part info card, mission brief, readiness check, debrief. Built by src/ui/panels.js. */
+
+.doc__actions {
+  justify-content: flex-end;
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: var(--hair);
+}
+
+/* ---------- Part info card ---------- */
+.part-card { width: min(28rem, 100%); }
+.part-card__text { margin: 0 0 1.5rem; line-height: 1.55; }
+.part-card__stats { grid-template-columns: repeat(3, auto); justify-content: space-between; margin-bottom: 1.4rem; }
+.part-card__note {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-top: 1.1rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--r-chip);
+  background: color-mix(in srgb, var(--signal) 9%, var(--paper));
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--signal) 40%, transparent);
+}
+.part-card__note p { margin: 0; font-size: var(--fs-small); line-height: 1.5; }
+.part-card__note-icon { color: var(--signal); margin-top: 0.1rem; }
+.part-card__actions { margin-top: 1.5rem; }
+.part-card__actions .btn { flex: 1; padding: 0 16px; }
+
+/* ---------- Mission brief ---------- */
+.brief { width: min(66rem, 100%); }
+.brief .doc__title { font-size: calc(var(--fs-title) * 1.3); margin-bottom: 1.6rem; }
+.brief__cols { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 3rem; }
+.brief__story p { margin: 0 0 1.1rem; line-height: 1.6; }
+.brief__story .brief__lede { font-size: 1.25rem; line-height: 1.5; font-weight: 500; }
+.brief__story .brief__closing { margin: 1.6rem 0 0; font: italic 400 clamp(34px, 2vw + 14px, 46px)/1.05 var(--font-display); letter-spacing: -0.01em; }
+.brief__side { padding-left: 2.4rem; border-left: var(--hair); }
+.brief__stats { display: flex; flex-direction: column; margin: 0.9rem 0 0; }
+.brief__stats .stat { flex-direction: row; align-items: baseline; justify-content: space-between; padding: 0.7rem 0; border-top: var(--hair); }
+.brief__stats .stat:first-child { border-top: 0; }
+.brief__stats .stat__label { order: 0; }
+.brief__stats .stat__num { font-size: clamp(30px, 1.6vw + 14px, 42px); }
+.brief__side .rule { margin: 1rem 0 1.2rem; }
+.requirements { list-style: none; margin: 1rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 1.1rem; }
+.requirements__item { display: grid; grid-template-columns: 2rem 1fr; gap: 0.6rem; }
+.requirements__no { font: 500 var(--fs-micro)/1.9 var(--font-mono); color: var(--ink-3); letter-spacing: 0.04em; }
+.requirements__title { display: block; font-weight: 600; margin-bottom: 0.1rem; }
+.requirements p { margin: 0; font-size: var(--fs-small); color: var(--ink-2); line-height: 1.5; }
+
+/* ---------- Readiness check ---------- */
+.readiness { width: min(40rem, 100%); }
+.readiness .doc__title { margin-bottom: 1.2rem; }
+.verdict {
+  --tone: var(--green);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--tone) 11%, var(--paper));
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--tone) 38%, transparent);
+}
+.verdict--warning { --tone: var(--amber); }
+.verdict--blocker { --tone: var(--signal); }
+.verdict__badge { display: grid; place-items: center; flex: none; width: 2.75rem; height: 2.75rem; border-radius: 50%; color: #fff; background: var(--tone); }
+.verdict__badge .icon { width: 1.5rem; height: 1.5rem; stroke-width: 2.2; }
+.verdict__text { display: flex; flex-direction: column; line-height: 1.3; }
+.verdict__text b { font-size: 1.125rem; }
+.verdict__text span { font-size: var(--fs-small); color: var(--ink-2); }
+.readiness__meters { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1.6rem; }
+.readiness .rule { margin: 0.9rem 0 1.1rem; }
+
+/* ---------- Debrief ---------- */
+.debrief { width: min(78rem, 100%); }
+.debrief__head { display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; }
+.debrief__result .label { margin-bottom: 0.75rem; }
+.debrief__title { font-size: clamp(52px, 3.6vw + 22px, 92px); line-height: 0.95; }
+.debrief .star { width: clamp(46px, 3.4vw, 66px); height: clamp(46px, 3.4vw, 66px); }
+.debrief .stars { gap: 0.9rem; }
+.debrief__objectives { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.debrief__objective { display: flex; gap: 0.75rem; align-items: flex-start; font-size: var(--fs-small); line-height: 1.45; color: var(--ink-2); }
+.debrief__objective .icon { margin-top: 0.05rem; width: 1.3rem; height: 1.3rem; stroke-width: 2.2; color: var(--signal); }
+.debrief__objective.is-earned { color: var(--ink); }
+.debrief__objective.is-earned .icon { color: var(--green); }
+.debrief .rule { margin: 1.3rem 0; }
+.debrief__stats { grid-template-columns: repeat(4, 1fr); }
+.debrief__cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2.5rem; }
+.debrief__section > .label { margin-bottom: 0.9rem; }
+.debrief__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.8rem; }
+.debrief__list li { display: grid; grid-template-columns: 1.1rem 1fr; gap: 0.75rem; line-height: 1.5; }
+.debrief__list li > span:last-child { font-size: var(--fs-small); }
+.debrief__list:not(.debrief__list--icon) li:first-child > span:last-child { font-weight: 500; font-size: 1rem; }
+.debrief__list .icon { width: 1.1rem; height: 1.1rem; margin-top: 0.2rem; stroke-width: 2.2; color: var(--ink); }
+.debrief__dot { width: 7px; height: 7px; margin: 0.55rem 0 0 0.15rem; border-radius: 50%; background: var(--ink); }

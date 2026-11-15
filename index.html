@@ -7,8 +7,12 @@
   <link rel="icon" href="data:,">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/hud.css">
+  <link rel="stylesheet" href="css/panels.css">
+  <link rel="stylesheet" href="css/screens.css">
   <script type="importmap">
   {
     "imports": {
@@ -21,10 +25,7 @@
 <body>
   <div id="stage"></div>
   <div id="ui"></div>
-  <div id="loading" class="loading is-visible" aria-live="polite">
-    <div class="loading__label">Loading</div>
-    <div class="loading__bar"><div class="loading__fill" id="loading-fill"></div></div>
-  </div>
+  <div id="loading" class="loading is-visible" aria-live="polite"></div>
   <script type="module" src="src/main.js"></script>
 </body>
 </html>

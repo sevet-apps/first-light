@@ -3,7 +3,9 @@ import { createPlaceholderScene } from './shared/placeholder.js';
 
 export default createPlaceholderScene({
   id: 'launch',
-  title: 'Launch',
+  title: 'Launch Sequence',
+  code: 'FL-DOC-004',
+  index: '04 / 05',
   blurb: 'Placeholder: the cinematic ascent of your rocket arrives in a later ticket.',
   actions: [{ label: 'Continue to orbit', kind: 'primary', to: 'orbit' }],
   pausable: true,

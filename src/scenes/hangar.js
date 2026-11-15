@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { disposeObject3D } from '../core/sceneManager.js';
-import { el, button } from '../core/ui.js';
+import { el, button, keyCap } from '../core/ui.js';
 
 const ROOM = { w: 60, d: 40, h: 70 };
 const EYE_HEIGHT = 1.7;
@@ -73,10 +73,9 @@ export default {
 
     screen = ctx.ui.screen('screen--bottom');
     const bar = el('div', 'hud-bottom');
-    bar.append(
-      el('div', 'hint', 'Click to look around (or hold left mouse and drag)  -  Esc: menu'),
-      button('Continue to launch  [Enter]', 'primary', () => ctx.scenes.goto('launch')),
-    );
+    const hint = el('div', 'night hint-chip enter');
+    hint.append(el('span', '', 'Click to look around, or hold the mouse and drag'), keyCap('Esc', { night: true }), el('span', '', 'Menu'));
+    bar.append(hint, button('Continue to launch', 'primary', () => ctx.scenes.goto('launch'), { key: 'Enter' }));
     screen.append(bar);
     ctx.ui.setObjective('Hangar placeholder', [
       { text: 'Look around the high bay', done: true },

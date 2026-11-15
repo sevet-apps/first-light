@@ -1,0 +1,67 @@
+/* FIRST LIGHT - design tokens. Spec: docs/UI_STYLE.md ("Flight Manual"). */
+:root {
+  /* palette (section 1) */
+  --paper: #F1ECE2;
+  --paper-2: #E7E0D3;
+  --ink: #1B1B1B;
+  --ink-2: #5A5650;
+  --ink-3: #8C867C;
+  --signal: #D8382C;
+  --signal-ink: #A92A20;
+  --blue: #2E5AAC;
+  --amber: #D98A12;
+  --green: #2F8F5B;
+  --night: rgba(20, 23, 29, 0.84);
+  --night-line: rgba(241, 236, 226, 0.16);
+  --night-solid: #14171D;
+  --world: #07090d;
+
+  /* type (section 2) */
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-ui: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', Consolas, monospace;
+  --fs-body: clamp(16px, 0.55vw + 9px, 19px);
+  --fs-small: max(15px, 0.9rem);
+  --fs-micro: clamp(12px, 0.2vw + 8.5px, 13px);
+  --fs-title: clamp(34px, 2.4vw + 10px, 56px);
+  --fs-hero: clamp(84px, 11.5vw, 220px);
+  --tracking-micro: 0.12em;
+
+  /* shape and depth (section 3) */
+  --r-card: 18px;
+  --r-btn: 12px;
+  --r-chip: 10px;
+  --r-key: 8px;
+  --shadow-card: 0 24px 60px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.25);
+  --shadow-pop: 0 12px 30px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.2);
+  --rule: 1.5px solid var(--ink);
+  --hair: 1px solid var(--paper-2);
+  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .2  0 0 0 0 .15  0 0 0 0 .1  0 0 0 .9 0'/></filter><rect width='180' height='180' filter='url(%23n)' opacity='.055'/></svg>");
+  --mark: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' stroke='%231B1B1B' stroke-width='1' opacity='.55'><circle cx='9' cy='9' r='4.5'/><path d='M9 0v18M0 9h18'/></svg>");
+
+  /* motion (section 6) */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --t-enter: 380ms;
+  --t-exit: 200ms;
+  --t-fast: 140ms;
+  --t-sweep: 220ms;
+  --stagger: 40ms;
+  --rise: 16px;
+  --drop: 8px;
+
+  /* layout */
+  --margin: 20px;
+  --z-ui: 10;
+  --z-modal: 40;
+  --z-fade: 60;
+  --z-loading: 70;
+  --z-debug: 80;
+}
+
+@media (min-width: 1600px) { :root { --margin: 32px; } }
+
+/* Calm motion: movement is replaced by fades (section 6). */
+@media (prefers-reduced-motion: reduce) {
+  :root { --t-enter: 200ms; --t-exit: 120ms; --t-sweep: 1ms; --stagger: 0ms; }
+}

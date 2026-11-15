@@ -1,13 +1,14 @@
 import * as THREE from 'three';
 import { disposeObject3D } from '../../core/sceneManager.js';
-import { el, button } from '../../core/ui.js';
+import { el, button, documentCard } from '../../core/ui.js';
+import { stagger } from '../../ui/motion.js';
 
 /**
  * Factory for placeholder scenes: a 3D backdrop plus a titled card with buttons.
  *  build(root, camera) -> optional animate(dt, t); fills the THREE scene.
- *  actions: [{ label, kind, to }] where `to` is a scene id.
+ *  actions: [{ label, kind, to }] where `to` is a scene id. code/index are the print furniture of the document card.
  */
-export function createPlaceholderScene({ id, title, blurb, actions, pausable = false, build, bloom }) {
+export function createPlaceholderScene({ id, title, blurb, actions, code = '', index = '', pausable = false, build, bloom }) {
   let root = null;
   let screen = null;
   let animate = null;
@@ -23,11 +24,12 @@ export function createPlaceholderScene({ id, title, blurb, actions, pausable = f
       ctx.renderer.setView(root, camera, { bloom });
 
       screen = ctx.ui.screen('screen--bottom');
-      const card = el('div', 'panel');
-      card.append(el('h2', 'card-title', title), el('p', 'card-text', blurb));
+      const card = documentCard({ code, index, label: 'Placeholder', title, className: 'placeholder-card' });
+      card.body.append(el('p', '', blurb));
       const row = el('div', 'btn-row');
       for (const a of actions) row.append(button(a.label, a.kind, () => ctx.scenes.goto(a.to)));
-      card.append(row);
+      card.body.append(row);
+      stagger(card.body);
       screen.append(card);
     },
 
