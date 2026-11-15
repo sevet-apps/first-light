@@ -10,7 +10,7 @@ You are implementing one ticket of **FIRST LIGHT**. The lead reviews every ticke
 - ffmpeg / ffprobe are on PATH.
 - Chrome: `"C:/Program Files/Google/Chrome/Application/chrome.exe"`. Headless screenshot example (server must be running):
   `chrome.exe --headless=new --enable-unsafe-swiftshader --use-angle=swiftshader --window-size=1920,1080 --virtual-time-budget=8000 --screenshot=C:/path/out.png "http://localhost:8080/?scene=title"`
-  Use headless screenshots for your own self-check. Do **not** use the in-app browser pane tools; the lead uses those for review.
+  Use headless screenshots for your own self-check (your own `--user-data-dir` and your own `--remote-debugging-port`, e.g. 9457). Do **not** use the in-app browser pane tools and never attach to any other browser or debug port — the lead uses those for review.
 - Dev server: the lead keeps `python tools/serve.py` running on port **8080** for review — never stop or kill it. For your own checks start a second server with `python tools/serve.py --port 8090` in the background and stop only that process (by its PID) when done.
 
 ## Rules
