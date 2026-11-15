@@ -6,8 +6,8 @@ Rule: one ticket in flight at a time; the next is issued only after the lead acc
 | # | Ticket | Status | Notes |
 |---|---|---|---|
 | T1 | Core skeleton: index, import map, renderer+post, scene manager, input, audio buses, settings/pause menu, debug hooks, dev server | ACCEPTED | lead-verified in browser: scene chain, no GPU leaks, menus, debug overlay |
-| T2 | Mission model: component catalog, readiness checks, deterministic orbit sim, balancing harness | IN PROGRESS | |
-| T2b | UI design system "Flight Manual": tokens, components, motion, UI-kit page; restyle T1 menus, title, loading, prompt, tracker | TODO | inserted after owner feedback: current UI looks generic |
+| T2 | Mission model: component catalog, readiness checks, deterministic orbit sim, balancing harness | ACCEPTED | 54/54 tests; budget $38M forces trade-offs; fastlink rewards careful piloting. Polish later: safe-mode reason should name the activity that drained the battery |
+| T2b | UI design system "Flight Manual": tokens, components, motion, UI-kit page; restyle T1 menus, title, loading, prompt, tracker | IN PROGRESS | inserted after owner feedback: current UI looks generic |
 | T3 | Hangar gameplay (placeholder geometry): FPS controller + collisions, interaction/highlight, pick-carry-ghost-install, console brief + readiness UI, integration + launch trigger | TODO | |
 | T4 | Orbit ops + debrief + redesign loop (placeholder launch) → full playable loop | TODO | |
 | T5 | Intro film: edit from NASA/ESA footage, VO, music, SFX stems, subtitles, skip/volume, title screen | TODO | |

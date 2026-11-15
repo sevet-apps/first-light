@@ -37,24 +37,24 @@ Mission v1: **"FIRST LIGHT" — Earth-observation satellite LUMEN-1.** Image wil
 
 ## 3. Components and mission model
 
-Categories and options (numbers are tuned in ticket T2; this table is the starting point). Each option is a physical part on a rack in the hangar.
+Categories and options (final numbers tuned and verified in T2 — `tests/sim.html`). Each option is a physical part on a rack in the hangar.
 
 | Category | Id | Name | Mass kg | Cost $M | Key stats |
 |---|---|---|---|---|---|
-| Bus (structure, avionics, storage) | `bus_micro` | MB-40 Microsat Bus | 40 | 5 | base load 15 W, storage 2 000 MB, max instrument 12 kg, no 4-panel array, no X-band |
-| | `bus_small` | SB-90 Smallsat Bus | 90 | 11 | base load 28 W, storage 8 000 MB, accepts everything |
-| Instrument | `inst_wfc` | WFC-30 Wide-Field Camera | 9 | 4 | 30 W, 70 MB/min, 30 m resolution |
-| | `inst_hri` | HRI-5 Hi-Res Multispectral Imager | 24 | 15 | 85 W, 160 MB/min, 5 m resolution |
-| Solar | `sol_body` | Body-Mounted Cells | 4 | 1.5 | 60 W |
-| | `sol_2wing` | DSA-2 Deployable 2-Wing Array | 12 | 5 | 180 W |
-| | `sol_4panel` | DSA-4 Four-Panel Array | 22 | 9 | 320 W, needs SB-90 |
+| Bus (structure, avionics, storage) | `bus_micro` | MB-40 Microsat Bus | 40 | 5 | base load 30 W, storage 2 000 MB, max instrument 12 kg, no 4-panel array, no X-band |
+| | `bus_small` | SB-90 Smallsat Bus | 90 | 11 | base load 65 W, storage 8 000 MB, accepts everything |
+| Instrument | `inst_wfc` | WFC-30 Wide-Field Camera | 9 | 4 | 45 W, 70 MB/min, 30 m resolution |
+| | `inst_hri` | HRI-5 Hi-Res Multispectral Imager | 24 | 15 | 290 W, 160 MB/min, 5 m resolution |
+| Solar | `sol_body` | Body-Mounted Cells | 4 | 1.5 | 55 W |
+| | `sol_2wing` | DSA-2 Deployable 2-Wing Array | 12 | 5 | 190 W |
+| | `sol_4panel` | DSA-4 Four-Panel Array | 22 | 9 | 480 W, needs SB-90 |
 | Battery | `bat_120` | LB-120 Li-ion Pack | 3 | 1 | 120 Wh |
 | | `bat_400` | LB-400 Li-ion Pack | 9 | 3 | 400 Wh |
 | Antenna | `ant_uhf` | UHF Whip | 1 | 0.5 | 8 W, 10 MB/min |
-| | `ant_sband` | S-Band Patch | 2 | 2 | 20 W, 60 MB/min |
-| | `ant_xband` | X-Band Dish | 6 | 6 | 45 W, 400 MB/min, needs SB-90 |
+| | `ant_sband` | S-Band Patch | 2 | 2 | 60 W, 70 MB/min |
+| | `ant_xband` | X-Band Dish | 6 | 6 | 120 W, 400 MB/min, needs SB-90 |
 
-Mission constraints (tunable): budget **$45 M**, launcher capacity **180 kg** to 550 km sun-synchronous orbit, goal **2 400 MB** delivered.
+Mission constraints: budget **$38 M**, launcher capacity **180 kg** to 550 km sun-synchronous orbit, goal **2 400 MB** delivered. The "best of everything" build costs $44 M, so the player must choose where to compromise. Verified viable builds: *balanced* (S-band, big battery), *budget* (microsat, wide-field camera — 2 stars max), *fastlink* (X-band, small battery — needs careful piloting around eclipses for 3 stars), *bigsolar* (big array, small battery, slow S-band).
 
 ### Pre-launch readiness check
 - **Blockers** (cannot integrate): missing part, over budget, over mass, incompatible part.
