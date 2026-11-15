@@ -115,7 +115,7 @@ docs/                 (DESIGN.md, TICKETS.md, previews/ screenshots)
 
 **Orbit.** Pure black space, dense subtle starfield (no over-bright stars), NASA Blue Marble Earth with thin blue atmospheric rim, night-side city lights, clouds, a hard bright Sun with lens glare. Terminator crossing makes the satellite go dark and the UI shift to battery-discharge state.
 
-**UI language.** Dark translucent glass panels `rgba(8,12,18,0.72)`, 1 px hairline borders `rgba(159,195,255,0.2)`, generous spacing, no clutter. Fonts: *Rajdhani* (headings, numbers, uppercase tracking 0.08em) + *Inter* (body), fallback `Segoe UI, system-ui`. Accent cyan `#6fd3ff` (interactive), amber `#ffb547` (warning), red `#ff5a5a` (blocker/critical), green `#5dffa1` (ok). Base font ≥ 15 px at 1080p; scales with viewport (clamp). Interaction prompts center-bottom; objective tracker top-left; minimal crosshair dot.
+**UI language — "Flight Manual" (chosen by the product owner, binding).** The interface is a set of printed mission documents over the 3D world: warm paper, black ink, one signal red; Instrument Serif titles, Inter text, generous sizes, rounded corners, soft deep shadows, calm motion. Full specification: [`docs/UI_STYLE.md`](UI_STYLE.md). Anything that looks like a generic sci-fi HUD (cyan glow, tiny monospace, sharp boxes) is a defect.
 
 **Sound world.** Hangar: deep HVAC drone, distant metallic clanks, reverberant footsteps (concrete vs metal), servo whirs, torque-wrench zips, satisfying "clunk" on install. Launch: sub-bass rumble, crackle, roar that swells and muffles with altitude to silence. Orbit: near silence, soft synth pad, UI chirps, data-link telemetry chirps. Music: warm cinematic pads, slow build, never busy.
 
@@ -123,7 +123,7 @@ docs/                 (DESIGN.md, TICKETS.md, previews/ screenshots)
 1. No console errors or warnings from our code on load and during the feature.
 2. Feature demonstrably works in the running game (lead verifies via screenshots + debug hooks).
 3. 60 fps target at 1920×1080 on a desktop GPU; no frame spikes > 50 ms during normal play (except scene loads behind a loading screen).
-4. Text readable at 1280×720 and 1920×1080; nothing overlaps; English only.
+4. Text readable at 1280×720 and 1920×1080; nothing overlaps; English only; every UI element follows `docs/UI_STYLE.md`.
 5. Code: small focused modules, no dead code, no copy-paste duplication, resources disposed on scene exit.
 6. Commit with a clear message; push to `origin main`.
 
