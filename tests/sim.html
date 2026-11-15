@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FIRST LIGHT - mission model tests</title>
+<style>
+  :root { color-scheme: dark; --ok: #5dffa1; --warn: #ffb547; --bad: #ff5a5a; --cyan: #6fd3ff; }
+  body { margin: 0; padding: 24px 32px 64px; background: #0b0f15; color: #d7e0ee; font: 14px/1.5 Inter, "Segoe UI", system-ui, sans-serif; }
+  h1 { font: 600 22px Rajdhani, "Segoe UI", sans-serif; letter-spacing: .08em; text-transform: uppercase; margin: 0 0 4px; }
+  h2 { font: 600 16px Rajdhani, "Segoe UI", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--cyan); margin: 32px 0 8px; }
+  #summary { font-size: 18px; margin: 8px 0 0; }
+  .ok { color: var(--ok); } .warning { color: var(--warn); } .blocker, .fail { color: var(--bad); }
+  table { border-collapse: collapse; margin: 4px 0; }
+  th, td { padding: 3px 14px 3px 0; text-align: left; vertical-align: top; }
+  th { color: #8a9bb3; font-weight: 500; border-bottom: 1px solid #243044; }
+  td.n, th.n { text-align: right; }
+  tr.sep td { border-top: 1px solid #1a2433; }
+  code, .mono { font-family: Consolas, monospace; }
+  .check { margin: 6px 0; padding-left: 10px; border-left: 3px solid #243044; max-width: 110ch; }
+  .check.warning { border-color: var(--warn); } .check.blocker { border-color: var(--bad); } .check.ok { border-color: #1f5a3e; }
+  .check b { color: #fff; font-weight: 600; } .check .fix { color: #9fb5d8; }
+  details { margin: 8px 0; } summary { cursor: pointer; font-weight: 600; }
+  .muted { color: #6f8099; }
+</style>
+</head>
+<body>
+<h1>Mission model tests</h1>
+<p class="muted">Pure model: src/data + src/sim. Result hash (identical on every run):
+  <span id="hash" class="mono">...</span></p>
+<p id="summary">Running...</p>
+
+<h2>Expectations</h2>
+<table id="expectations"></table>
+
+<h2>Scenario matrix (config x policy)</h2>
+<table id="matrix"></table>
+
+<h2>Readiness checks</h2>
+<div id="readiness"></div>
+
+<h2>Sample debrief text (greedy operator)</h2>
+<div id="debrief"></div>
+
+<script type="module">
+import { runSimTests } from './sim-tests.js';
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const mark = (b) => (b ? '<span class="ok">PASS</span>' : '<span class="fail">FAIL</span>');
+
+try {
+  const r = await runSimTests();
+  window.__simTestResults = {
+    allPass: r.allPass, passed: r.passed, failed: r.failed, hash: r.hash,
+    failures: r.expectations.filter((e) => !e.pass),
+    matrix: r.matrix,
+  };
+
+  $('hash').textContent = r.hash;
+  $('summary').innerHTML = `<span class="${r.allPass ? 'ok' : 'fail'}">${r.allPass ? 'ALL PASS' : 'FAILURES'}</span> - ${r.passed} of ${r.passed + r.failed} expectations`;
+
+  let last = '';
+  $('expectations').innerHTML = '<tr><th></th><th>Group</th><th>Expectation</th><th>Detail</th></tr>' + r.expectations.map((e) => {
+    const sep = e.group !== last ? ' class="sep"' : '';
+    last = e.group;
+    return `<tr${sep}><td>${mark(e.pass)}</td><td>${esc(e.group)}</td><td>${esc(e.name)}</td><td class="muted">${esc(e.detail)}</td></tr>`;
+  }).join('');
+
+  last = '';
+  $('matrix').innerHTML = '<tr><th>Config</th><th>Policy</th><th class="n">Delivered MB</th><th class="n">% of goal</th><th class="n">Lost MB</th><th class="n">Safe modes</th><th class="n">Stars</th><th>Success</th></tr>'
+    + r.matrix.map((m) => {
+      const sep = m.config !== last ? ' class="sep"' : '';
+      last = m.config;
+      return `<tr${sep}><td>${m.config}</td><td>${m.policy}</td><td class="n">${m.deliveredMB}</td><td class="n">${m.pct}</td><td class="n">${m.lostMB}</td>`
+        + `<td class="n">${m.safeModes}</td><td class="n">${'★'.repeat(m.stars) || '-'}</td><td class="${m.success ? 'ok' : 'fail'}">${m.success ? 'success' : 'fail'}</td></tr>`;
+    }).join('');
+
+  $('readiness').innerHTML = r.readiness.map((cfg) => {
+    const checks = cfg.checks.map((c) => `<div class="check ${c.severity}"><b class="${c.severity}">${c.severity.toUpperCase()}</b> <b>${esc(c.title)}</b><br>${esc(c.detail)}${c.fix ? `<br><span class="fix">Fix: ${esc(c.fix)}</span>` : ''}</div>`).join('');
+    const t = cfg.totals;
+    return `<details open><summary>${esc(cfg.name)} <span class="muted">- $${t.cost} M, ${t.mass} kg, `
+      + `${t.orbitAvgBalanceW.toFixed(0)} W orbit average - ${cfg.canIntegrate ? '<span class="ok">can integrate</span>' : '<span class="fail">cannot integrate</span>'}</span></summary>${checks}</details>`;
+  }).join('');
+
+  $('debrief').innerHTML = Object.entries(r.sampleResults).map(([name, res]) => `<details><summary>${name} - ${res.success ? 'success' : 'failed'}, ${res.stars} star(s)</summary>`
+    + res.objectives.map((o) => `<div class="${o.met ? 'ok' : 'fail'}">${o.met ? '✓' : '✗'} ${esc(o.text)}</div>`).join('')
+    + res.reasons.map((x) => `<div>- ${esc(x)}</div>`).join('')
+    + res.suggestions.map((x) => `<div class="warning">&gt; ${esc(x)}</div>`).join('')
+    + res.positives.map((x) => `<div class="ok">+ ${esc(x)}</div>`).join('') + '</details>').join('');
+} catch (err) {
+  console.error(err);
+  window.__simTestResults = { allPass: false, error: String(err) };
+  $('summary').innerHTML = `<span class="fail">Test run crashed:</span> ${esc(err)}`;
+}
+</script>
+</body>
+</html>

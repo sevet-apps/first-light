@@ -1,4 +1,10 @@
 import { el } from './ui.js';
+import { catalog } from '../data/components.js';
+import { mission } from '../data/mission.js';
+import { presets } from '../data/presets.js';
+import { evaluateAssembly } from '../sim/assembly.js';
+import { createOrbitSim } from '../sim/orbit.js';
+import { policies } from '../sim/policies.js';
 
 /** Installs the `window.__fl` automation API (always) and the stats overlay (only with ?debug=1). */
 export function installDebug({ enabled, app }) {
@@ -10,6 +16,7 @@ export function installDebug({ enabled, app }) {
     audio,
     renderer,
     menus,
+    sim: { evaluateAssembly, createOrbitSim, catalog, mission, presets, policies },
     goto: (id, params) => scenes.goto(id, params),
     get scene() { return scenes.current; },
   };

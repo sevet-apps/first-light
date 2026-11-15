@@ -1,18 +1,11 @@
-// Game state shell. Later tickets fill in the mission model and the assembly.
+// Game state: mission config, current assembly, last result, URL params.
+import { mission } from './data/mission.js';
 
-function createMission() {
-  return {
-    id: 'lumen-1',
-    name: 'FIRST LIGHT',
-    budgetMusd: 45,
-    capacityKg: 180,
-    goalMB: 2400,
-  };
-}
+const createMission = () => structuredClone(mission);
 
 export const state = {
   mission: createMission(),
-  assembly: {}, // slot -> partId
+  assembly: {}, // slot -> partId: bus, instrument, solar, battery, antenna
   lastResult: null,
   params: { debug: false, warp: 1, assembly: null }, // parsed URL params
 

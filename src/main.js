@@ -1,4 +1,5 @@
 import { state } from './state.js';
+import { presets } from './data/presets.js';
 import { settings, onSettingsChange } from './core/settings.js';
 import { Renderer } from './core/renderer.js';
 import { SceneManager } from './core/sceneManager.js';
@@ -22,6 +23,7 @@ const params = new URLSearchParams(location.search);
 state.params.debug = params.get('debug') === '1';
 state.params.warp = Number(params.get('warp')) || 1;
 state.params.assembly = params.get('assembly');
+if (presets[state.params.assembly]) state.assembly = { ...presets[state.params.assembly] };
 
 const ui = new UI(document.getElementById('ui'), document.getElementById('loading'));
 const renderer = new Renderer(document.getElementById('stage'), settings.quality);
