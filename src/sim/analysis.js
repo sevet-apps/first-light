@@ -4,7 +4,7 @@ import { fmt, fmtMB } from '../data/format.js';
 import { starsFor } from '../data/mission.js';
 import { evaluateAssembly } from './assembly.js';
 
-const MODE_ACTIVITY = { SUN: 'sitting in SUN-POINT', IMAGE: 'imaging', DOWNLINK: 'downlinking', SAFE: 'in safe mode' };
+const MODE_ACTIVITY = { SUN: 'running only its base systems in SUN-POINT', IMAGE: 'imaging', DOWNLINK: 'downlinking', SAFE: 'in safe mode' };
 const UNUSED_PASS_NOTE_MIN = 12;
 const SLOW_LINK_GOAL_RATIO = 2; // a link that can carry under 2x the goal over all passes counts as slow
 const round1 = (n) => Math.round(n * 10) / 10;

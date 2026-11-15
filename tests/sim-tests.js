@@ -43,12 +43,10 @@ function buildMatrix() {
 }
 
 function readinessReport() {
-  const tight = { ...mission, budgetMusd: 30 };
   const light = { ...mission, capacityKg: 120 };
   const cases = [
     ...Object.entries(presets).map(([name, a]) => [name, a, mission]),
-    ['overbudget (balanced parts, $30 M budget)', presets.balanced, tight],
-    ['overmass (premium parts, 120 kg launcher)', presets.premium, light],
+    ['overmass (overbudget parts, 120 kg launcher)', presets.overbudget, light],
     ['empty hangar', {}, mission],
   ];
   return cases.map(([name, assembly, m]) => ({ name, ...evaluateAssembly(assembly, m) }));
@@ -135,14 +133,12 @@ export async function runSimTests() {
   const hasCheck = (name, id, severity) => ready(name).checks.some((c) => c.id === id && c.severity === severity);
   const detailOf = (name, id) => ready(name).checks.find((c) => c.id === id)?.detail ?? '';
 
-  // premium
-  expect('premium', 'integrable, within budget and mass', ready('premium').canIntegrate
-    && ready('premium').totals.cost <= mission.budgetMusd && ready('premium').totals.mass <= mission.capacityKg,
-  `$${ready('premium').totals.cost} M, ${ready('premium').totals.mass} kg`);
-  const pg = row('premium', 'greedy');
-  expect('premium', 'greedy: at least 140 % of goal', pg.pct >= 140, `${pg.pct} %`);
-  expect('premium', 'greedy: no safe mode', pg.safeModes === 0);
-  expect('premium', 'greedy: 3 stars', pg.stars === 3, `${pg.stars}`);
+  // overbudget (the priciest part of every category)
+  const ob = ready('overbudget');
+  expect('overbudget', 'blocker "over budget" and cannot integrate', hasCheck('overbudget', 'over_budget', 'blocker') && !ob.canIntegrate,
+    `$${ob.totals.cost} M vs $${mission.budgetMusd} M`);
+  expect('overbudget', 'fix names concrete swaps and the money saved', /Swap the .* for the .*saving \$/.test(ob.checks.find((c) => c.id === 'over_budget').fix),
+    ob.checks.find((c) => c.id === 'over_budget').fix);
 
   // balanced
   expect('balanced', 'integrable', ready('balanced').canIntegrate);
@@ -153,7 +149,7 @@ export async function runSimTests() {
   // budget
   const budgetCost = ready('budget').totals.cost;
   expect('budget', 'integrable and the cheapest viable config', ready('budget').canIntegrate
-    && ['premium', 'balanced', 'underpowered', 'slowlink'].every((n) => budgetCost < ready(n).totals.cost), `$${budgetCost} M`);
+    && ['balanced', 'fastlink', 'bigsolar', 'underpowered', 'slowlink'].every((n) => budgetCost < ready(n).totals.cost), `$${budgetCost} M`);
   const ug = row('budget', 'greedy');
   expect('budget', 'greedy: 100-115 % of goal', ug.pct >= 100 && ug.pct <= 115, `${ug.pct} %`);
   expect('budget', 'greedy: at most 2 stars (resolution)', ug.stars === 2, `${ug.stars}`);
@@ -168,16 +164,38 @@ export async function runSimTests() {
   const upText = upResult.suggestions.join(' ');
   expect('underpowered', 'suggestions mention solar and battery', /solar/i.test(upText) && /battery/i.test(upText));
 
+  // fastlink: the piloting test
+  const fl = ready('fastlink');
+  expect('fastlink', `integrable within $${mission.budgetMusd} M`, fl.canIntegrate && fl.totals.cost <= mission.budgetMusd, `$${fl.totals.cost} M`);
+  const flg = row('fastlink', 'greedy');
+  const fls = row('fastlink', 'smart');
+  expect('fastlink', 'greedy: at least one safe mode (loses the Resilient star)', flg.safeModes >= 1 && flg.stars <= 2, `${flg.safeModes} safe, ${flg.stars} stars`);
+  expect('fastlink', 'smart: 0 safe modes, success, 3 stars', fls.safeModes === 0 && fls.success && fls.stars === 3, `${fls.safeModes} safe, ${fls.pct} %, ${fls.stars} stars`);
+  expect('fastlink', 'debrief of greedy blames the battery and suggests a fix', (() => {
+    const r = fly(presets.fastlink, 'greedy');
+    return r.reasons.some((x) => /Battery ran flat/.test(x)) && r.suggestions.some((x) => /battery|SUN-POINT/i.test(x));
+  })());
+
+  // bigsolar: reported only, but its debrief must be readable
+  const bsr = fly(presets.bigsolar, 'greedy');
+  expect('bigsolar', 'integrable and has a headline plus explanations', ready('bigsolar').canIntegrate && bsr.reasons.length >= 1 && bsr.positives.length >= 1,
+    `greedy ${row('bigsolar', 'greedy').pct} %, ${row('bigsolar', 'greedy').safeModes} safe; smart ${row('bigsolar', 'smart').pct} %, ${row('bigsolar', 'smart').safeModes} safe`);
+
+  // economy: real trade-offs
+  const winners = Object.keys(presets).filter((n) => ready(n).canIntegrate && row(n, 'smart').success);
+  expect('economy', 'at least 3 integrable configs within budget succeed under smart', winners.length >= 3, winners.join(', '));
+  const profile = (n) => `${ready(n).totals.cost}|${presets[n].instrument}|${presets[n].antenna}`;
+  expect('economy', 'those winners have different profiles', new Set(winners.map(profile)).size === winners.length);
+  const pilotable = Object.keys(presets).filter((n) => ready(n).canIntegrate && row(n, 'smart').stars > row(n, 'greedy').stars);
+  expect('economy', 'at least one config where smart earns more stars than greedy', pilotable.length >= 1, pilotable.join(', '));
+
   // slowlink
   expect('slowlink', 'integrable but warns about the radio link', ready('slowlink').canIntegrate && hasCheck('slowlink', 'downlink_short', 'warning'));
   expect('slowlink', 'greedy: fails', !row('slowlink', 'greedy').success, `${row('slowlink', 'greedy').pct} %`);
   expect('slowlink', 'reasons say data is stuck on board', fly(presets.slowlink, 'greedy').reasons.some((r) => /on board/.test(r)));
 
   // blockers
-  expect('overbudget', 'blocker "over budget" (balanced parts, $30 M budget)', hasCheck('overbudget (balanced parts, $30 M budget)', 'over_budget', 'blocker')
-    && !ready('overbudget (balanced parts, $30 M budget)').canIntegrate);
-  expect('overbudget', 'premium sits within the real budget', ready('premium').totals.cost <= mission.budgetMusd);
-  expect('overmass', 'blocker "too heavy" (premium parts, 120 kg launcher)', hasCheck('overmass (premium parts, 120 kg launcher)', 'over_mass', 'blocker'));
+  expect('overmass', 'blocker "too heavy" (overbudget parts, 120 kg launcher)', hasCheck('overmass (overbudget parts, 120 kg launcher)', 'over_mass', 'blocker'));
   expect('incompatible', 'MB-40 + HRI-5 is a blocker with a reason', hasCheck('incompatible', 'incompatible_instrument', 'blocker')
     && /12 kg/.test(detailOf('incompatible', 'incompatible_instrument')), detailOf('incompatible', 'incompatible_instrument'));
   expect('incompatible', 'MB-40 + X-Band is a blocker with a reason', hasCheck('incompatible', 'incompatible_antenna', 'blocker')
@@ -191,7 +209,7 @@ export async function runSimTests() {
   expect('compatibilityFor', 'bus is always placeable on an empty stand', compatibilityFor('bus_micro', {}).ok);
   expect('compatibilityFor', 'HRI-5 on MB-40 is refused', !compatibilityFor('inst_hri', { bus: 'bus_micro' }).ok);
   expect('compatibilityFor', 'X-Band on SB-90 is accepted', compatibilityFor('ant_xband', { bus: 'bus_small' }).ok);
-  expect('compatibilityFor', 'swapping to MB-40 under an HRI-5 is refused', !compatibilityFor('bus_micro', presets.premium).ok);
+  expect('compatibilityFor', 'swapping to MB-40 under an HRI-5 is refused', !compatibilityFor('bus_micro', presets.overbudget).ok);
 
   // idle + careless
   for (const config of Object.keys(presets)) {
@@ -225,7 +243,8 @@ export async function runSimTests() {
   // robustness against the schedule seed
   const seedProblems = [];
   for (const s of [2, 3, 4, 5]) {
-    if (!fly(presets.premium, 'greedy', s).success) seedProblems.push(`premium fails with seed ${s}`);
+    if (fly(presets.fastlink, 'greedy', s).safeModeCount < 1) seedProblems.push(`fastlink greedy has no safe mode with seed ${s}`);
+    if (!fly(presets.fastlink, 'smart', s).success) seedProblems.push(`fastlink smart fails with seed ${s}`);
     if (!fly(presets.balanced, 'greedy', s).success) seedProblems.push(`balanced fails with seed ${s}`);
     if (!fly(presets.budget, 'greedy', s).success) seedProblems.push(`budget fails with seed ${s}`);
     if (fly(presets.underpowered, 'greedy', s).success) seedProblems.push(`underpowered succeeds with seed ${s}`);

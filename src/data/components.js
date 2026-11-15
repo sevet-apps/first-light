@@ -17,7 +17,7 @@ const PARTS = [
     mass: 40, cost: 5,
     description: 'A compact, thrifty frame that carries a small camera and not much else.',
     stats: {
-      baseLoadW: 20, storageMB: 2000, maxInstrumentKg: 12,
+      baseLoadW: 30, storageMB: 2000, maxInstrumentKg: 12,
       allows: { solar: ['sol_body', 'sol_2wing'], antenna: ['ant_uhf', 'ant_sband'] },
     },
   },
@@ -26,7 +26,7 @@ const PARTS = [
     mass: 90, cost: 11,
     description: 'A sturdy, roomy backbone with big on-board memory that welcomes every payload.',
     stats: {
-      baseLoadW: 40, storageMB: 8000, maxInstrumentKg: 40,
+      baseLoadW: 65, storageMB: 8000, maxInstrumentKg: 40,
       allows: {
         solar: ['sol_body', 'sol_2wing', 'sol_4panel'],
         antenna: ['ant_uhf', 'ant_sband', 'ant_xband'],
@@ -37,31 +37,31 @@ const PARTS = [
     id: 'inst_wfc', category: 'instrument', name: 'WFC-30 Wide-Field Camera', shortName: 'WFC-30',
     mass: 9, cost: 4,
     description: 'A light, frugal camera that sweeps wide swaths but sees only the big picture.',
-    stats: { powerW: 40, dataRateMBmin: 70, resolutionM: 30 },
+    stats: { powerW: 45, dataRateMBmin: 70, resolutionM: 30 },
   },
   {
     id: 'inst_hri', category: 'instrument', name: 'HRI-5 Hi-Res Multispectral Imager', shortName: 'HRI-5',
     mass: 24, cost: 15,
     description: 'A power-hungry eye sharp enough to pick a single fire front out of a forest.',
-    stats: { powerW: 130, dataRateMBmin: 160, resolutionM: 5 },
+    stats: { powerW: 290, dataRateMBmin: 160, resolutionM: 5 },
   },
   {
     id: 'sol_body', category: 'solar', name: 'Body-Mounted Cells', shortName: 'Body cells',
     mass: 4, cost: 1.5,
     description: 'Solar cells glued straight onto the satellite walls: simple, light, and weak.',
-    stats: { powerW: 40 },
+    stats: { powerW: 55 },
   },
   {
     id: 'sol_2wing', category: 'solar', name: 'DSA-2 Deployable 2-Wing Array', shortName: 'DSA-2',
     mass: 12, cost: 5,
     description: 'Two folding wings that unfurl in orbit and turn sunlight into a steady supply.',
-    stats: { powerW: 180 },
+    stats: { powerW: 190 },
   },
   {
     id: 'sol_4panel', category: 'solar', name: 'DSA-4 Four-Panel Array', shortName: 'DSA-4',
     mass: 22, cost: 9,
     description: 'Four broad panels that flood the satellite with power, if the bus can hold them.',
-    stats: { powerW: 320, requiresBus: ['bus_small'] },
+    stats: { powerW: 480, requiresBus: ['bus_small'] },
   },
   {
     id: 'bat_120', category: 'battery', name: 'LB-120 Li-ion Pack', shortName: 'LB-120',
@@ -85,13 +85,13 @@ const PARTS = [
     id: 'ant_sband', category: 'antenna', name: 'S-Band Patch', shortName: 'S-Band',
     mass: 2, cost: 2,
     description: 'A flat patch antenna, the dependable middle road for small missions.',
-    stats: { powerW: 20, rateMBmin: 75 },
+    stats: { powerW: 60, rateMBmin: 70 },
   },
   {
     id: 'ant_xband', category: 'antenna', name: 'X-Band Dish', shortName: 'X-Band',
     mass: 6, cost: 6,
     description: 'A steerable dish that empties the memory in a single ground-station pass.',
-    stats: { powerW: 60, rateMBmin: 400, requiresBus: ['bus_small'] },
+    stats: { powerW: 120, rateMBmin: 400, requiresBus: ['bus_small'] },
   },
 ];
 

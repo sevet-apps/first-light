@@ -4,9 +4,9 @@ export const mission = {
   id: 'lumen-1',
   satellite: 'LUMEN-1',
   name: 'FIRST LIGHT',
-  budgetMusd: 45,
+  budgetMusd: 38,
   capacityKg: 180,
-  goalMB: 2500,
+  goalMB: 2400,
 
   orbit: {
     orbits: 3,
@@ -56,8 +56,8 @@ export const mission = {
       + 'The first hours decide whether a spark becomes a catastrophe, and those hours are the ones we cannot see.',
     'LUMEN-1 is our answer: a small Earth-observation satellite that circles the planet every 95 minutes '
       + 'and photographs regions at risk of wildfire. You will design it, build it with your own hands, and fly it.',
-    'You have $45 million, a rocket that can lift 180 kg, and three orbits. The satellite must send at least '
-      + '2 500 MB of imagery down to the ground stations. Power, memory and radio speed all pull against each other, '
+    'You have $38 million, a rocket that can lift 180 kg, and three orbits. The satellite must send at least '
+      + '2 400 MB of imagery down to the ground stations. Power, memory and radio speed all pull against each other, '
       + 'and every part you choose has a price in kilograms, dollars and watts.',
     'Bring home first light.',
   ],

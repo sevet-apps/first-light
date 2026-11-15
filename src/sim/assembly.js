@@ -40,8 +40,8 @@ export function compatibilityFor(partId, assembly) {
   return reason ? { ok: false, reason } : { ok: true, reason: '' };
 }
 
-/** Best swap that saves at least `excess` of `key` (cost or mass); falls back to the biggest saving. */
-function savingSwap(parts, key, excess) {
+/** All single swaps to a cheaper (or lighter) compatible part of the same category. */
+function savingSwaps(parts, key) {
   const options = [];
   for (const cat of CATEGORIES) {
     const current = parts[cat];
@@ -51,8 +51,7 @@ function savingSwap(parts, key, excess) {
       if (saving > 0 && !incompatibility(alt, parts.bus)) options.push({ current, alt, saving });
     }
   }
-  const enough = options.filter((o) => o.saving >= excess).sort((a, b) => a.saving - b.saving);
-  return enough[0] ?? options.sort((a, b) => b.saving - a.saving)[0];
+  return options;
 }
 
 function estimateTotals(parts, mission) {
@@ -120,7 +119,7 @@ export function evaluateAssembly(assembly, mission) {
     add('over_budget', 'blocker', 'Over budget',
       `The parts cost ${fmtMusd(totals.cost)} but the mission budget is ${fmtMusd(mission.budgetMusd)}, `
       + `${fmtMusd(Math.round((totals.cost - mission.budgetMusd) * 10) / 10)} too much.`,
-      swapAdvice(savingSwap(parts, 'cost', totals.cost - mission.budgetMusd), 'cost', fmtMusd));
+      swapAdvice(parts, 'cost', totals.cost - mission.budgetMusd, fmtMusd));
   } else if (parts.bus) {
     add('budget', 'ok', 'Budget',
       `${fmtMusd(totals.cost)} of ${fmtMusd(mission.budgetMusd)} used, ${fmtMusd(Math.round((mission.budgetMusd - totals.cost) * 10) / 10)} to spare.`);
@@ -129,7 +128,7 @@ export function evaluateAssembly(assembly, mission) {
     add('over_mass', 'blocker', 'Too heavy for the rocket',
       `The satellite weighs ${fmt(totals.mass)} kg but the launcher can lift only ${fmt(mission.capacityKg)} kg to orbit, `
       + `${fmt(totals.mass - mission.capacityKg)} kg too much.`,
-      swapAdvice(savingSwap(parts, 'mass', totals.mass - mission.capacityKg), 'mass', (n) => `${fmt(n)} kg`));
+      swapAdvice(parts, 'mass', totals.mass - mission.capacityKg, (n) => `${fmt(n)} kg`));
   } else if (parts.bus) {
     add('mass', 'ok', 'Launch mass',
       `${fmt(totals.mass)} kg of ${fmt(mission.capacityKg)} kg capacity, ${fmt(mission.capacityKg - totals.mass)} kg of margin.`);
@@ -156,11 +155,24 @@ export function evaluateAssembly(assembly, mission) {
   return { totals, checks, canIntegrate };
 }
 
-function swapAdvice(swap, key, format) {
-  if (!swap) return 'Choose cheaper or lighter parts.';
-  const unit = format(swap.current[key]);
-  return `Swap the ${swap.current.shortName} (${unit}) for the ${swap.alt.shortName} (${format(swap.alt[key])}), `
-    + `which saves ${format(Math.round(swap.saving * 10) / 10)}.`;
+/** Concrete fix text: the mildest single swap that covers `excess`, plus a two-swap alternative. */
+function swapAdvice(parts, key, excess, format) {
+  const options = savingSwaps(parts, key);
+  const describe = (o) => `the ${o.current.shortName} (${format(o.current[key])}) for the ${o.alt.shortName} (${format(o.alt[key])})`;
+  const amount = (n) => format(Math.round(n * 10) / 10);
+  const singles = options.filter((o) => o.saving >= excess).sort((a, b) => a.saving - b.saving);
+  const pairs = [];
+  options.forEach((x, i) => options.slice(i + 1).forEach((y) => {
+    if (x.current.category !== y.current.category && x.saving + y.saving >= excess) pairs.push([x, y]);
+  }));
+  pairs.sort((a, b) => a[0].saving + a[1].saving - b[0].saving - b[1].saving);
+  const advice = [];
+  if (singles[0]) advice.push(`Swap ${describe(singles[0])}, saving ${amount(singles[0].saving)}`);
+  if (pairs[0]) {
+    const [x, y] = pairs[0];
+    advice.push(`${advice.length ? 'or swap' : 'Swap'} ${describe(x)} and ${describe(y)}, saving ${amount(x.saving + y.saving)} together`);
+  }
+  return advice.length ? advice.join(', ') + '.' : 'Choose cheaper or lighter parts.';
 }
 
 function incompatibleFix(cat, parts) {
