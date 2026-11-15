@@ -8,7 +8,9 @@ Rule: one ticket in flight at a time; the next is issued only after the lead acc
 | T1 | Core skeleton: index, import map, renderer+post, scene manager, input, audio buses, settings/pause menu, debug hooks, dev server | ACCEPTED | lead-verified in browser: scene chain, no GPU leaks, menus, debug overlay |
 | T2 | Mission model: component catalog, readiness checks, deterministic orbit sim, balancing harness | ACCEPTED | 54/54 tests; budget $38M forces trade-offs; fastlink rewards careful piloting. Polish later: safe-mode reason should name the activity that drained the battery |
 | T2b | UI design system "Flight Manual": tokens, components, motion, UI-kit page; restyle T1 menus, title, loading, prompt, tracker | IN PROGRESS | inserted after owner feedback: current UI looks generic |
-| T3 | Hangar gameplay (placeholder geometry): FPS controller + collisions, interaction/highlight, pick-carry-ghost-install, console brief + readiness UI, integration + launch trigger | TODO | |
+| T3a | Hangar placeholder layout (docs/HANGAR_LAYOUT.md) + first-person controller with collisions, head-bob, footstep hooks + look-at highlight, prompts, part info cards | TODO | |
+| T3b | Assembly: pick up, carry (mass slows you), ghost preview with compatibility, install/remove/swap/return animations, live build sheet HUD | TODO | |
+| T3c | Mission Console (brief, readiness check, integrate), integration cinematic (placeholder), Launch Control → launch scene with the assembly | TODO | |
 | T4 | Orbit ops + debrief + redesign loop (placeholder launch) → full playable loop | TODO | |
 | T5 | Intro film: edit from NASA/ESA footage, VO, music, SFX stems, subtitles, skip/volume, title screen | TODO | |
 | T6 | Blender: satellite parts (2 buses, 2 instruments, 3 solar, 2 batteries, 3 antennas) + sockets + deploy anims + baked materials | TODO | |
