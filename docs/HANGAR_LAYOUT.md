@@ -33,7 +33,8 @@ Props for scale and atmosphere (crates, carts, gas bottles, tool chests, cable r
 ## Part sockets on a bus (bus local space, origin = bottom centre on the stand adapter)
 - `SOCKET_instrument` — top face centre, pointing +Y (on orbit this face points at Earth).
 - `SOCKET_antenna` — front face (+Z) centre.
-- `SOCKET_solar` — origin for the solar part (body cells wrap the bus; deployable arrays mount on ±X faces, stowed for launch).
+- `SOCKET_solar_px` / `SOCKET_solar_nx` — hinge lines on the ±X faces where the two wings of a deployable array (`wing_px` / `wing_nx`) attach, stowed for launch.
+- `SOCKET_body` — origin for body-mounted cells (they wrap the bus faces; the part has a `fit_bus_micro` / `fit_bus_small` variant).
 - `SOCKET_battery` — rear face (−Z), behind an access panel.
 
 Bus sizes: MB-40 0.6 × 0.8 × 0.6 m (w × h × d), SB-90 1.0 × 1.3 × 1.0 m.
