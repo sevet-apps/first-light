@@ -28,9 +28,10 @@ const keyStat = (part) => {
 
 /**
  * Part info card for the hangar. `installed` swaps Install for Put back as the primary action.
- * `assembly` (slot -> part id) enables the live compatibility note.
+ * `assembly` (slot -> part id) enables the live compatibility note. `actions: false` shows the card
+ * for inspection only (the hangar prompt already names the key), without the Install / Put back buttons.
  */
-export function partInfoCard(part, { assembly = null, installed = false, onInstall = null, onPutBack = null } = {}) {
+export function partInfoCard(part, { assembly = null, installed = false, onInstall = null, onPutBack = null, actions: showActions = true } = {}) {
   const slot = CATEGORIES.indexOf(part.category) + 1;
   const card = documentCard({
     code: part.shortName.toUpperCase().replace(/\s+/g, '-'),
@@ -60,6 +61,7 @@ export function partInfoCard(part, { assembly = null, installed = false, onInsta
     card.body.append(note);
   }
 
+  if (!showActions) return card;
   const actions = el('div', 'btn-row part-card__actions');
   const install = button(installed ? 'Installed' : 'Install', installed ? 'secondary' : 'primary', onInstall, { key: 'E' });
   install.disabled = installed || !compat.ok;

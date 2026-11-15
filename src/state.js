@@ -7,7 +7,7 @@ export const state = {
   mission: createMission(),
   assembly: {}, // slot -> partId: bus, instrument, solar, battery, antenna
   lastResult: null,
-  params: { debug: false, warp: 1, assembly: null }, // parsed URL params
+  params: { debug: false, warp: 1, assembly: null, selftest: false }, // parsed URL params
 
   resetMission() {
     this.mission = createMission();

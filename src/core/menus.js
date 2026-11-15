@@ -29,6 +29,7 @@ export function settingsForm() {
       onInput: (v) => setSetting('mouseSensitivity', v),
     }),
     toggleRow('Invert Y', settings.invertY, (v) => setSetting('invertY', v)),
+    toggleRow('Camera bob', settings.cameraBob, (v) => setSetting('cameraBob', v)),
   ];
   const display = [
     toggleRow('Subtitles', settings.subtitles, (v) => setSetting('subtitles', v)),

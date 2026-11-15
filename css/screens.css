@@ -11,6 +11,8 @@
   text-align: center;
 }
 .screen--bottom { justify-content: flex-end; padding-bottom: calc(var(--margin) + 2vh); }
+/* Keeps the hangar part info card at the right edge, vertically centred */
+.screen--peek { align-items: flex-end; text-align: left; }
 
 /* ---------- Fade + loading ---------- */
 .fade {

@@ -6,6 +6,7 @@ const defaults = () => ({
   volumes: { master: 0.8, music: 0.7, voice: 1, sfx: 0.9, ambience: 0.8 },
   mouseSensitivity: 1,
   invertY: false,
+  cameraBob: true,
   subtitles: true,
   quality: 'high',
 });
@@ -19,6 +20,7 @@ function sanitize(raw) {
   for (const k of Object.keys(base.volumes)) base.volumes[k] = clamp(volumes[k], 0, 1, base.volumes[k]);
   base.mouseSensitivity = clamp(raw.mouseSensitivity, 0.2, 3, base.mouseSensitivity);
   if (typeof raw.invertY === 'boolean') base.invertY = raw.invertY;
+  if (typeof raw.cameraBob === 'boolean') base.cameraBob = raw.cameraBob;
   if (typeof raw.subtitles === 'boolean') base.subtitles = raw.subtitles;
   if (raw.quality === 'low' || raw.quality === 'high') base.quality = raw.quality;
   return base;
