@@ -10,8 +10,8 @@ Rule: one ticket in flight at a time; the next is issued only after the lead acc
 | T2b | UI design system "Flight Manual": tokens, components, motion, UI-kit page; restyle T1 menus, title, loading, prompt, tracker | ACCEPTED | Flight Manual UI live: title, loading, menus, UI kit (parts, brief, readiness, HUD, debrief); fixed hyphen spacing and objective states |
 | T3a | Hangar placeholder layout (docs/HANGAR_LAYOUT.md) + first-person controller with collisions, head-bob, footstep hooks + look-at highlight, prompts, part info cards | ACCEPTED | lead-verified on GPU: 144 fps, 180 draw calls, live walk 6.4 m/2 s, selfTest 85/85, focus + info cards OK. Later: auto-hide controls hint; light through clerestory windows (T9) |
 | T3b | Assembly: pick up, carry (mass slows you), ghost preview with compatibility, install/remove/swap/return animations, live build sheet HUD | ACCEPTED | selfTest 90/90; carry/ghost/install/swap/remove verified in browser. Cost meter near-limit should be amber (fix in T3c). Perf re-check pending (leftover headless Chrome hogging CPU) |
-| T3c | Mission Console (brief, readiness check, integrate), integration cinematic (placeholder), Launch Control → launch scene with the assembly | IN PROGRESS | |
-| T4 | Orbit ops + debrief + redesign loop (placeholder launch) → full playable loop | TODO | |
+| T3c | Mission Console (brief, readiness check, integrate), integration cinematic (placeholder), Launch Control → launch scene with the assembly | ACCEPTED | console (brief/readiness/integrate), 15 s integration cinematic with crane climb, Launch Control card verified in browser; smoothness re-check on GPU pending |
+| T4 | Orbit ops + debrief + redesign loop (placeholder launch) → full playable loop | IN PROGRESS | |
 | T5 | Intro film: edit from NASA/ESA footage, VO, music, SFX stems, subtitles, skip/volume, title screen | TODO | |
 | T6 | Blender: satellite parts (2 buses, 2 instruments, 3 solar, 2 batteries, 3 antennas) + sockets + deploy anims + baked materials | TODO | |
 | T7 | Blender: launcher (core, upper stage, 2 boosters), fairing halves, payload adapter | TODO | |
