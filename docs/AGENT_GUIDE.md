@@ -11,6 +11,7 @@ You are implementing one ticket of **FIRST LIGHT**. The lead reviews every ticke
 - Chrome: `"C:/Program Files/Google/Chrome/Application/chrome.exe"`. Headless screenshot example (server must be running):
   `chrome.exe --headless=new --enable-unsafe-swiftshader --use-angle=swiftshader --window-size=1920,1080 --virtual-time-budget=8000 --screenshot=C:/path/out.png "http://localhost:8080/?scene=title"`
   Use headless screenshots for your own self-check (your own `--user-data-dir` and your own `--remote-debugging-port`, e.g. 9457). Do **not** use the in-app browser pane tools and never attach to any other browser or debug port — the lead uses those for review.
+- **Close every browser you start.** When your checks are done, terminate each headless Chrome you launched (its whole process tree, by the PID you started). A forgotten SwiftShader Chrome burns CPU for hours and ruins the lead's performance measurements.
 - Dev server: the lead keeps `python tools/serve.py` running on port **8080** for review — never stop or kill it. For your own checks start a second server with `python tools/serve.py --port 8090` in the background and stop only that process (by its PID) when done.
 
 ## Rules
