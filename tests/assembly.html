@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<title>FIRST LIGHT - assembly self-test</title>
+<style>
+  :root { color-scheme: dark; --ok: #4fbf84; --bad: #ee6a5f; --signal: #D8382C; }
+  body { margin: 0; padding: 24px 32px 64px; background: #0b0f15; color: #d7e0ee; font: 14px/1.5 Inter, "Segoe UI", system-ui, sans-serif; }
+  h1 { font: 600 22px "Instrument Serif", Georgia, serif; letter-spacing: .08em; text-transform: uppercase; margin: 0 0 4px; }
+  #summary { font-size: 18px; margin: 8px 0 16px; }
+  .ok { color: var(--ok); } .fail { color: var(--bad); }
+  table { border-collapse: collapse; }
+  th, td { padding: 3px 18px 3px 0; text-align: left; vertical-align: top; }
+  th { color: #8a9bb3; font-weight: 500; border-bottom: 1px solid #243044; }
+  .muted { color: #6f8099; }
+  iframe { position: absolute; width: 1280px; height: 720px; left: -9999px; border: 0; }
+</style>
+</head>
+<body>
+<h1>Assembly self-test</h1>
+<p class="muted">Every integrable preset assembled on the stand, socket transforms, refusals with reasons, swap, remove and put-back rules, weight and build sheet, run inside the real hangar scene (?scene=hangar&amp;selftest=assembly).</p>
+<p id="summary">Running...</p>
+<table id="rows"></table>
+<iframe id="game" src="../index.html?scene=hangar&selftest=assembly"></iframe>
+<script>
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const frame = document.getElementById('game');
+const poll = setInterval(() => {
+  const r = frame.contentWindow?.__assemblySelfTest;
+  if (!r) return;
+  clearInterval(poll);
+  window.__assemblySelfTest = r;
+  const passed = r.results.filter((x) => x.pass).length;
+  const summary = document.getElementById('summary');
+  summary.className = r.allPass ? 'ok' : 'fail';
+  summary.textContent = `${r.allPass ? 'ALL PASS' : 'FAILURES'} - ${passed} of ${r.results.length}`;
+  document.getElementById('rows').innerHTML = '<tr><th>Group</th><th>Check</th><th>Result</th><th>Detail</th></tr>' + r.results.map((x) =>
+    `<tr><td class="muted">${x.group}</td><td>${esc(x.name)}</td><td class="${x.pass ? 'ok' : 'fail'}">${x.pass ? 'PASS' : 'FAIL'}</td><td class="muted">${esc(x.detail)}</td></tr>`).join('');
+}, 250);
+</script>
+</body>
+</html>

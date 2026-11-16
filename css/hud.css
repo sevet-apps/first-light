@@ -3,7 +3,7 @@
 /* ---------- Toast ---------- */
 .toasts {
   position: absolute;
-  top: var(--margin);
+  top: var(--toast-top, var(--margin)); /* a scene with a top-right card (hangar build sheet) moves toasts below it */
   right: var(--margin);
   display: flex;
   flex-direction: column;
@@ -59,6 +59,8 @@
   white-space: nowrap;
 }
 .prompt__verb { font-weight: 500; }
+.prompt--bad { white-space: normal; max-width: max(20rem, min(36rem, calc(100vw - 48rem))); padding-left: 1rem; border-color: rgba(216, 56, 44, 0.55); }
+.prompt__icon { flex: none; width: 1.4rem; height: 1.4rem; stroke-width: 2; color: var(--signal); }
 .prompt__dot { color: rgba(241, 236, 226, 0.5); }
 .prompt__object { font-weight: 600; }
 
@@ -147,3 +149,64 @@
 .timeline__eta { font-weight: 600; font-size: var(--fs-small); white-space: nowrap; }
 
 .mode-bar { display: inline-flex; align-items: center; gap: 1.1rem; padding: 0.65rem 0.75rem 0.65rem 1.3rem; border-radius: 16px; }
+
+/* ---------- Build sheet (hangar, night card, top-right) ---------- */
+.sheet { position: absolute; top: var(--margin); right: var(--margin); width: min(22rem, 42vw); padding: 1.05rem 1.3rem 1.2rem; text-align: left; }
+.sheet__head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.sheet__code { font: 500 var(--fs-micro)/1 var(--font-mono); letter-spacing: 0.06em; color: rgba(241, 236, 226, 0.55); }
+.sheet__title { margin: 0.3rem 0 0.8rem; font-size: 1.7rem; line-height: 1.1; }
+.sheet__slots { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.15rem; }
+.sheet__slot {
+  position: relative; display: grid; grid-template-columns: 1.9rem 5.6rem 1fr; align-items: center; gap: 0.7rem;
+  margin: 0 -0.5rem; padding: 0.22rem 0.5rem; border-radius: 10px;
+  color: rgba(241, 236, 226, 0.55); transition: color 300ms, background-color 300ms, box-shadow 300ms;
+}
+.sheet__badge {
+  display: grid; place-items: center; width: 1.9rem; height: 1.9rem; border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px rgba(241, 236, 226, 0.4); transition: background-color 300ms, color 300ms, box-shadow 300ms;
+}
+.sheet__badge .icon { width: 1.15rem; height: 1.15rem; stroke-width: 1.9; }
+.sheet__cat { font-size: var(--fs-small); }
+.sheet__name { font-weight: 600; text-align: right; }
+.sheet__slot.is-filled { color: var(--paper); }
+.sheet__slot.is-filled .sheet__badge { background: var(--paper); color: var(--ink); box-shadow: none; }
+.sheet__slot.is-target { background: rgba(216, 56, 44, 0.16); box-shadow: inset 0 0 0 1.5px rgba(216, 56, 44, 0.75); color: var(--paper); }
+.sheet__slot.is-flash { animation: sheet-flash 1100ms var(--ease-out); }
+@keyframes sheet-flash {
+  0% { background-color: rgba(241, 236, 226, 0.5); }
+  100% { background-color: rgba(241, 236, 226, 0); }
+}
+.sheet .rule--night { margin: 0.9rem 0; }
+
+/* Compact: only the title and the five slot icons, so the part info card fits under it at the right edge. */
+.sheet.is-compact .sheet__head { display: none; }
+.sheet.is-compact .sheet__title { margin: 0 0 0.6rem; font-size: 1.35rem; }
+.sheet.is-compact .sheet__slots { flex-direction: row; justify-content: space-between; }
+.sheet.is-compact .sheet__slot { display: flex; margin: 0; padding: 0.2rem; }
+.sheet.is-compact .sheet__cat, .sheet.is-compact .sheet__name { display: none; }
+
+/* Everything below the slot rows folds away while an info card needs the right edge. */
+.sheet__more { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 320ms var(--ease-out), opacity 240ms; }
+.sheet__more-inner { overflow: hidden; min-height: 0; }
+.sheet.is-compact .sheet__more { grid-template-rows: 0fr; opacity: 0; }
+.sheet__meters { display: flex; flex-direction: column; gap: 0.95rem; }
+.sheet__readout { display: inline-flex; align-items: baseline; gap: 0.55rem; }
+.sheet__delta { font-size: var(--fs-small); font-weight: 600; color: rgba(241, 236, 226, 0.55); font-variant-numeric: tabular-nums; }
+.sheet__delta.is-over { color: #f0786d; }
+.sheet__lines { margin: 0; display: flex; flex-direction: column; gap: 0.35rem; }
+.sheet__line { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.sheet__label { color: rgba(241, 236, 226, 0.7); font-size: var(--fs-small); }
+.sheet__value { margin: 0; display: inline-flex; align-items: baseline; gap: 0.5rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.sheet__unit { font-weight: 400; color: rgba(241, 236, 226, 0.6); margin-left: -0.35rem; font-size: var(--fs-small); }
+
+/* Carry readout: replaces the controls hint while a part is in your hands. */
+.hud-bottom:has(.carry-chip) .hint-chip { display: none; }
+.carry-chip { display: inline-flex; align-items: center; gap: 0.7rem; padding: 0.5rem 1.1rem 0.5rem 0.9rem; border-radius: 12px; font-size: var(--fs-small); }
+.carry-chip b { font-weight: 600; }
+.carry-chip__mass { color: rgba(241, 236, 226, 0.65); }
+.carry-chip .key { height: 1.7rem; min-width: 1.7rem; font-size: max(15px, 0.82rem); }
+
+/* Controls reminder inside the pause menu (paper card). */
+.help { list-style: none; margin: 0 0 1.2rem; padding: 0; display: flex; flex-direction: column; gap: 0.55rem; }
+.help__row { display: flex; align-items: center; gap: 0.7rem; color: var(--ink-2); font-size: var(--fs-small); }
+.help__row .key { flex: none; }

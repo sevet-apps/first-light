@@ -70,6 +70,7 @@ export class Menus {
       label: 'Flight manual',
       code: 'FL-MENU-01',
       hint: 'Esc',
+      content: this.scenes.current?.pauseHelp?.() ?? null,
       actions: [
         { label: 'Resume', kind: 'primary', onClick: () => this.resume() },
         { label: 'Settings', kind: 'secondary', onClick: () => this.openSettings('pause') },

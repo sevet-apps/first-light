@@ -205,9 +205,9 @@ export function createMaterials() {
     bottleGreen: std(0x2f8f5b, 0.4, 0.3),
     bottleWhite: std(0xdadde0, 0.4, 0.3),
     // Satellite parts
-    foil: std(0xd9a441, 0.32, 0.85),
-    alu: std(0xb9c0c8, 0.35, 0.8),
-    aluDouble: std(0xb9c0c8, 0.35, 0.8, { side: THREE.DoubleSide }),
+    foil: std(0xe3b04c, 0.36, 0.5),
+    alu: std(0xc4cbd3, 0.35, 0.55),
+    aluDouble: std(0xc4cbd3, 0.35, 0.55, { side: THREE.DoubleSide }),
     anodized: std(0x7b8798, 0.4, 0.5),
     lens: std(0x0b1330, 0.1, 0.5),
     cell: std(0x142a63, 0.3, 0.4),

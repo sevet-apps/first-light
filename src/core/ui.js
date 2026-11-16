@@ -74,12 +74,19 @@ export class UI {
     return node;
   }
 
-  /** "[E] Pick up · HRI-5 Imager": key cap, verb and optional object name. */
-  showPrompt(key, verb, object = '') {
+  /**
+   * "[E] Pick up · HRI-5 Imager": key cap, verb and optional object name.
+   * A null key drops the key cap; tone 'bad' marks a refusal (signal-red drawn icon, the text may wrap).
+   */
+  showPrompt(key, verb, object = '', { tone = '' } = {}) {
     const wasHidden = this.promptEl.hidden;
-    const parts = [keyCap(key, { night: true }), el('span', 'prompt__verb', verb)];
+    const parts = [];
+    if (key) parts.push(keyCap(key, { night: true }));
+    if (tone === 'bad') parts.push(icon('blocker', { className: 'prompt__icon' }));
+    parts.push(el('span', 'prompt__verb', verb));
     if (object) parts.push(el('span', 'prompt__dot', '·'), el('span', 'prompt__object', object));
     this.promptEl.replaceChildren(...parts);
+    this.promptEl.classList.toggle('prompt--bad', tone === 'bad');
     this.promptEl.hidden = false;
     if (wasHidden) replay(this.promptEl);
   }

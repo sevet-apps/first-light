@@ -1,7 +1,10 @@
 // Placeholder satellite parts: simple distinct shapes at real size, standing on a rack.
-// Each part is a Group named by its catalog id with its origin at the bottom centre.
+// A part is a root Group named by its catalog id (origin = bottom centre, at its rack slot) whose children are
+// the nodes that travel to bus sockets on install (see data/sockets.js MOUNTS). Most parts have one node, `main`;
+// deployable arrays split into `wing_px` / `wing_nx`; body cells have a rack `stack` and one fitted variant per bus.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { BUS_SOCKETS, SOCKET_NAMES } from '../../data/sockets.js';
 
 const mesh = (geometry, material, [x, y, z], rot = [0, 0, 0]) => {
   const m = new THREE.Mesh(geometry, material);
@@ -41,8 +44,8 @@ function instrument(mat, [w, h], { fins }) {
   return g;
 }
 
-/** Solar array stowed for launch: a stack of panels with a gap for the spacer pads. */
-function solarStack(mat, [w, h, d], panels, { strap }) {
+/** Body-mounted cells as shipped: a flat stack of cell panels. */
+function solarStack(mat, [w, h, d], panels) {
   const g = new THREE.Group();
   const pitch = h / panels;
   for (let i = 0; i < panels; i++) {
@@ -51,7 +54,6 @@ function solarStack(mat, [w, h, d], panels, { strap }) {
     g.add(box(mat.cell, w - 0.04, pitch * 0.12, d - 0.04, [0, y + pitch * 0.22, 0]));
   }
   for (const sx of [-1, 1]) g.add(box(mat.anodized, 0.03, h, 0.05, [sx * (w / 2 - 0.02), h / 2, 0]));
-  if (strap) g.add(box(mat.signalRed, 0.05, h + 0.02, d + 0.02, [0, h / 2, 0]));
   return g;
 }
 
@@ -98,22 +100,78 @@ function dish(mat, [w]) {
   return g;
 }
 
-const BUILDERS = {
-  bus_micro: (mat, s) => bus(mat, s),
-  bus_small: (mat, s) => bus(mat, s),
-  inst_wfc: (mat, s) => instrument(mat, s, { fins: false }),
-  inst_hri: (mat, s) => instrument(mat, s, { fins: true }),
-  sol_body: (mat, s) => solarStack(mat, s, 4, { strap: false }),
-  sol_2wing: (mat, s) => solarStack(mat, s, 6, { strap: true }),
-  sol_4panel: (mat, s) => solarStack(mat, s, 8, { strap: true }),
-  bat_120: (mat, s) => battery(mat, s, 1),
-  bat_400: (mat, s) => battery(mat, s, 2),
-  ant_uhf: (mat, s) => whip(mat, s),
-  ant_sband: (mat, s) => patch(mat, s),
-  ant_xband: (mat, s) => dish(mat, s),
+/** One stowed wing of a deployable array, in node space: contact plane at y = 0, panels stacked along +Y.
+ *  X is the wing's length along the bus face, Z its width; installed it stands against a side face. */
+function wing(mat, [w, h, d], panels) {
+  const g = new THREE.Group();
+  const pitch = h / panels;
+  for (let i = 0; i < panels; i++) {
+    const y = pitch * (i + 0.5);
+    g.add(box(mat.alu, w, pitch * 0.5, d, [0, y, 0]));
+    g.add(box(mat.cell, w - 0.04, pitch * 0.18, d - 0.04, [0, y + pitch * 0.3, 0]));
+  }
+  g.add(box(mat.anodized, w, 0.03, 0.05, [0, h * 0.5, d / 2 - 0.025]));
+  g.add(box(mat.anodized, w, 0.03, 0.05, [0, h * 0.5, -d / 2 + 0.025]));
+  return g;
+}
+
+/** Body-mounted cells fitted to one bus: a blue plate on each of the four side faces, in bus space. */
+function fittedCells(mat, [w, h, d]) {
+  const g = new THREE.Group();
+  const plate = (sx, sz, pos) => {
+    g.add(box(mat.alu, sx + 0.016, h * 0.86 + 0.016, sz + 0.016, pos));
+    g.add(box(mat.cell, sx + 0.024, h * 0.86, sz + 0.024, pos));
+  };
+  const ex = 0.008;
+  plate(0.008, d * 0.86, [w / 2 + ex, h / 2, 0]);
+  plate(0.008, d * 0.86, [-w / 2 - ex, h / 2, 0]);
+  plate(w * 0.86, 0.008, [0, h / 2, d / 2 + ex]);
+  plate(w * 0.86, 0.008, [0, h / 2, -d / 2 - ex]);
+  return g;
+}
+
+/** SOCKET_* empties on a bus node, from data. The real models carry the same names. */
+function addSockets(node, busId) {
+  for (const name of SOCKET_NAMES) {
+    const def = BUS_SOCKETS[busId][name];
+    const socket = new THREE.Object3D();
+    socket.name = `SOCKET_${name}`;
+    socket.position.set(...def.position);
+    socket.rotation.set(...(def.rotation ?? [0, 0, 0]).map((a) => (a * Math.PI) / 180));
+    if (def.scale) socket.scale.set(...def.scale);
+    node.add(socket);
+  }
+}
+
+// Nodes of every part: { name: { build(mat, size), at: [x, y, z] rack-form position inside the root, hidden? } }.
+const WING = [0.4, 0.22, 0.6];
+const WING4 = [0.5, 0.3, 0.8];
+const wingNodes = (size, panels) => ({
+  wing_px: { build: (mat) => wing(mat, size, panels), at: [size[0] / 2 + 0.01, 0, 0] },
+  wing_nx: { build: (mat) => wing(mat, size, panels), at: [-size[0] / 2 - 0.01, 0, 0] },
+});
+const single = (build) => ({ main: { build, at: [0, 0, 0] } });
+
+const NODES = {
+  bus_micro: single((mat, s) => bus(mat, s)),
+  bus_small: single((mat, s) => bus(mat, s)),
+  inst_wfc: single((mat, s) => instrument(mat, s, { fins: false })),
+  inst_hri: single((mat, s) => instrument(mat, s, { fins: true })),
+  sol_body: {
+    stack: { build: (mat, s) => solarStack(mat, s, 4), at: [0, 0, 0] },
+    fit_bus_micro: { build: (mat, s, sizes) => fittedCells(mat, sizes.bus_micro), at: [0, 0, 0], hidden: true },
+    fit_bus_small: { build: (mat, s, sizes) => fittedCells(mat, sizes.bus_small), at: [0, 0, 0], hidden: true },
+  },
+  sol_2wing: wingNodes(WING, 3),
+  sol_4panel: wingNodes(WING4, 2),
+  bat_120: single((mat, s) => battery(mat, s, 1)),
+  bat_400: single((mat, s) => battery(mat, s, 2)),
+  ant_uhf: single((mat, s) => whip(mat, s)),
+  ant_sband: single((mat, s) => patch(mat, s)),
+  ant_xband: single((mat, s) => dish(mat, s)),
 };
 
-/** Collapse a part's meshes into one mesh per material (keeps draw calls low); the group's origin is kept. */
+/** Collapse a node's meshes into one mesh per material (keeps draw calls low); the node's origin is kept. */
 function mergeByMaterial(group) {
   group.updateMatrixWorld(true);
   const byMaterial = new Map();
@@ -133,17 +191,27 @@ function mergeByMaterial(group) {
   return merged;
 }
 
-/** Build every rack part from the layout. Returns Map(partId -> Group), already placed in the world. */
+/** Build every rack part from the layout. Returns Map(partId -> root Group), already placed on its rack slot. */
 export function buildParts(layout, mat) {
   const parts = new Map();
   for (const rack of layout.RACKS) {
     for (const slot of rack.slots) {
-      const group = mergeByMaterial(BUILDERS[slot.partId](mat, slot.size));
-      group.name = slot.partId;
-      group.position.set(slot.x, layout.RACK_TOP, slot.z);
-      group.rotation.y = (slot.yawDeg * Math.PI) / 180;
-      group.userData.partId = slot.partId;
-      parts.set(slot.partId, group);
+      const root = new THREE.Group();
+      root.name = slot.partId;
+      root.userData.partId = slot.partId;
+      root.userData.nodes = {};
+      for (const [name, def] of Object.entries(NODES[slot.partId])) {
+        const node = mergeByMaterial(def.build(mat, slot.size, layout.PART_SIZES));
+        node.name = name;
+        node.position.set(...def.at);
+        node.visible = !def.hidden;
+        root.add(node);
+        root.userData.nodes[name] = node;
+        if (BUS_SOCKETS[slot.partId]) addSockets(node, slot.partId);
+      }
+      root.position.set(slot.x, layout.RACK_TOP, slot.z);
+      root.rotation.y = (slot.yawDeg * Math.PI) / 180;
+      parts.set(slot.partId, root);
     }
   }
   return parts;

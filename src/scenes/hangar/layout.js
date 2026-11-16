@@ -25,6 +25,8 @@ export const TOWER = { x: -9, z: -22, w: 5, d: 5, platformsY: [12, 24, 36, 48] }
 
 export const CLEANROOM = { x0: 8, x1: 24, z0: -2, z1: 18 };
 export const STAND = { x: 16, z: 8, radius: 1.2, topY: 1.0, socketBus: [16, 1.0, 8] };
+// Assembly: invisible hit volume over the stand and the satellite on it, and how far away you can aim at it.
+export const ASSEMBLY = { reach: 4.0, target: { w: 2.0, y0: 1.0, h: 2.6 } };
 export const CONSOLE = { x: 9, z: 8, w: 0.9, d: 2.4 }; // desk long side along Z, screen faces east
 export const ENCAP = { x: 9, z: -14, size: 5 };
 export const LAUNCH_CTL = { x: -12, z: 10, w: 3, d: 1, yawDeg: faceYaw(-12, 10, ROCKET.x, ROCKET.z) };
@@ -152,7 +154,7 @@ export const STATIONS = {
 };
 
 export const layout = {
-  HALL, PLAYER, REACH, SPAWN, LAUNCHER, ROCKET, TOWER, CLEANROOM, STAND, CONSOLE, ENCAP, LAUNCH_CTL,
+  HALL, PLAYER, REACH, SPAWN, LAUNCHER, ROCKET, TOWER, CLEANROOM, STAND, ASSEMBLY, CONSOLE, ENCAP, LAUNCH_CTL,
   RACK_TOP, RACKS, PROPS, HUMAN, PART_SIZES, COLLIDERS, STATIONS, PARTITIONS, COLUMN_Z,
   sockets: { bus: STAND.socketBus },
   surfaceAt, faceYaw, forward,

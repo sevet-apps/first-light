@@ -13,8 +13,11 @@ const CENTRE = new THREE.Vector2(0, 0);
  * a soft paper-coloured outline (inverted hull, faded), a night interaction prompt and, when it provides
  * `info`, a card on the right of the screen.
  *
- * register({ object, kind, id, label, verb, onInteract, reach, info?, outlineWidth? })
+ * register({ object, kind, id, label, verb, onInteract, reach, info?, outlineWidth?, outline?, enabled?, prompt?, precise? })
  *   info: () => HTMLElement, built when the object gains focus.
+ *   enabled: () => boolean, an entry that is not enabled cannot be focused (default: always).
+ *   prompt: () => { key, verb, label, tone } | null, a live prompt that replaces verb / label; it is re-read every frame.
+ *   outline: false skips the focus outline. precise: true picks against the object's real meshes instead of a box.
  */
 export class Interaction {
   /** hud: element that hosts the info card. */
@@ -26,6 +29,7 @@ export class Interaction {
     this.key = key;
     this.entries = new Map();
     this.proxies = [];
+    this.promptKey = '';
     this.current = null;
     this.card = null;
     this.outlines = new Set();
@@ -35,16 +39,18 @@ export class Interaction {
   }
 
   register(def) {
-    const entry = { outlineWidth: 0.012, ...def, distance: Infinity };
-    const bounds = localBounds(entry.object);
-    const size = bounds.getSize(new THREE.Vector3()).addScalar(PROXY_PAD * 2);
-    const proxy = new THREE.Mesh(new THREE.BoxGeometry(size.x, size.y, size.z), this.proxyMaterial);
-    proxy.position.copy(bounds.getCenter(new THREE.Vector3()));
-    proxy.userData = { isProxy: true, entry };
-    entry.object.add(proxy);
-    entry.proxy = proxy;
+    const entry = { outlineWidth: 0.012, outline: true, enabled: () => true, precise: false, ...def, distance: Infinity };
+    if (!entry.precise) {
+      const bounds = localBounds(entry.object);
+      const size = bounds.getSize(new THREE.Vector3()).addScalar(PROXY_PAD * 2);
+      const proxy = new THREE.Mesh(new THREE.BoxGeometry(size.x, size.y, size.z), this.proxyMaterial);
+      proxy.position.copy(bounds.getCenter(new THREE.Vector3()));
+      proxy.userData = { isProxy: true, entry };
+      entry.object.add(proxy);
+      entry.proxy = proxy;
+      this.proxies.push(proxy);
+    }
     this.entries.set(entry.id, entry);
-    this.proxies.push(proxy);
     this.raycaster.far = Math.max(this.raycaster.far, entry.reach);
     return entry;
   }
@@ -53,11 +59,27 @@ export class Interaction {
   pick() {
     const cam = this.camera;
     cam.updateMatrixWorld();
-    for (const p of this.proxies) p.updateWorldMatrix(true, false);
+    const targets = [];
+    const owners = new Map();
+    for (const p of this.proxies) {
+      if (!p.userData.entry.enabled()) continue;
+      p.updateWorldMatrix(true, false);
+      targets.push(p);
+      owners.set(p, p.userData.entry);
+    }
+    for (const entry of this.entries.values()) {
+      if (!entry.precise || !entry.enabled()) continue;
+      entry.object.updateWorldMatrix(true, true);
+      entry.object.traverseVisible((m) => {
+        if (!m.isMesh || m.userData.isOutline || m.userData.isProxy || m.userData.isFx) return;
+        targets.push(m);
+        owners.set(m, entry);
+      });
+    }
     this.raycaster.setFromCamera(CENTRE, cam);
     const { origin, direction: d } = this.raycaster.ray;
-    for (const hit of this.raycaster.intersectObjects(this.proxies, false)) {
-      const entry = hit.object.userData.entry;
+    for (const hit of this.raycaster.intersectObjects(targets, false)) {
+      const entry = owners.get(hit.object);
       if (hit.distance > entry.reach) continue;
       if (this.collision.rayDistance(origin.x, origin.y, origin.z, d.x, d.y, d.z, hit.distance) < hit.distance - 0.02) continue;
       entry.distance = hit.distance;
@@ -80,6 +102,7 @@ export class Interaction {
   /** Re-evaluate focus now (after a teleport or aim change) without advancing the fades. */
   refresh() {
     this.#setFocus(this.pick());
+    this.#syncPrompt();
     return this.current;
   }
 
@@ -117,13 +140,25 @@ export class Interaction {
       this.ui.hidePrompt();
       return;
     }
-    this.#fadeOutline(entry, 1);
-    this.ui.showPrompt(this.key, entry.verb, entry.label);
-    if (entry.info) {
-      this.card = entry.info();
+    if (entry.outline) this.#fadeOutline(entry, 1);
+    this.promptKey = '';
+    this.#syncPrompt();
+    this.card = entry.info?.() ?? null;
+    if (this.card) {
       this.card.classList.add('enter');
       this.hud.append(this.card);
     }
+  }
+
+  // Shows the focused entry's prompt, redrawing only when its text, key or tone changed.
+  #syncPrompt() {
+    const entry = this.current;
+    if (!entry) return;
+    const p = entry.prompt?.() ?? { key: this.key, verb: entry.verb, label: entry.label };
+    const sig = `${p.key}|${p.verb}|${p.label}|${p.tone ?? ''}`;
+    if (sig === this.promptKey) return;
+    this.promptKey = sig;
+    this.ui.showPrompt(p.key, p.verb, p.label, { tone: p.tone });
   }
 
   #dropCard() {
@@ -187,7 +222,7 @@ function localBounds(object) {
   object.updateWorldMatrix(true, true);
   const inv = new THREE.Matrix4().copy(object.matrixWorld).invert();
   const box = new THREE.Box3();
-  object.traverse((m) => {
+  object.traverseVisible((m) => {
     if (!m.isMesh || m.userData.isProxy) return;
     if (!m.geometry.boundingBox) m.geometry.computeBoundingBox();
     box.union(m.geometry.boundingBox.clone().applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv, m.matrixWorld)));

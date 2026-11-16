@@ -39,7 +39,8 @@ export class Player {
     this.yaw = 0;
     this.pitch = 0;
     this.speed = 0; // actual ground speed of the last step (m/s)
-    this.speedMultiplier = 1; // T3b lowers this while carrying heavy parts
+    this.speedMultiplier = 1; // lowered while carrying heavy parts
+    this.weight = 0; // 0..1 load being carried: heavier head bob and footsteps
     this.onFootstep = null; // ({ surface: 'concrete'|'epoxy', running }) => void
 
     this.phase = 0;
@@ -135,16 +136,18 @@ export class Player {
     this.phase += (dist / mode.stride) * TWO_PI;
     this.bobGain += (Math.min(1, this.speed / WALK_SPEED) - this.bobGain) * approach(10, dt);
     if (Math.floor(this.phase / TWO_PI) !== before && this.speed > 0.6) {
-      this.onFootstep?.({ surface: surfaceAt(this.pos.x, this.pos.z), running: this.runBlend > 0.5 });
+      this.onFootstep?.({ surface: surfaceAt(this.pos.x, this.pos.z), running: this.runBlend > 0.5, weight: this.weight });
     }
   }
 
+  // A load makes the steps shorter and the body rock more: lift and roll grow, the stride shrinks.
   #bobMode() {
+    const w = this.weight;
     return {
-      stride: lerp(BOB.walk.stride, BOB.run.stride, this.runBlend),
-      lift: lerp(BOB.walk.lift, BOB.run.lift, this.runBlend),
-      sway: lerp(BOB.walk.sway, BOB.run.sway, this.runBlend),
-      roll: lerp(BOB.walk.roll, BOB.run.roll, this.runBlend),
+      stride: lerp(BOB.walk.stride, BOB.run.stride, this.runBlend) * (1 - 0.2 * w),
+      lift: lerp(BOB.walk.lift, BOB.run.lift, this.runBlend) * (1 + 1.1 * w),
+      sway: lerp(BOB.walk.sway, BOB.run.sway, this.runBlend) * (1 + 0.6 * w),
+      roll: lerp(BOB.walk.roll, BOB.run.roll, this.runBlend) * (1 + 0.8 * w),
     };
   }
 
