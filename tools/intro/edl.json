@@ -1,0 +1,414 @@
+{
+ "title": "FIRST LIGHT intro film",
+ "fps": 30,
+ "size": [
+  1920,
+  1080
+ ],
+ "scope": [
+  1920,
+  804
+ ],
+ "duration": 34.0,
+ "title_card_start": 31.4,
+ "vo_offset": 0.1,
+ "sources": {
+  "press": "C:/Users/Svyatoslav/Downloads/Artemis I Launch 2022 CU tracking from Press Site_compressed~orig.mp4",
+  "rocketcam": "C:/Users/Svyatoslav/Downloads/Artemis I - Rocket Camera Footage~orig.mp4",
+  "sunset": "C:/Users/Svyatoslav/AppData/Local/Temp/nasa-real-footage-20261116/spacex-sunset.mp4",
+  "esa": "C:/Users/Svyatoslav/Downloads/2402_023_BR_084.mp4",
+  "orion": "C:/Users/Svyatoslav/Downloads/jsc2022m000272_Artemis_I_Orion_ICPS_Separation_Hi-Res~orig.mp4"
+ },
+ "beats": [
+  {
+   "n": 1,
+   "name": "The silence",
+   "cut": 0.4,
+   "text": "One. The silence.",
+   "tts": [
+    "One.",
+    "The silence."
+   ],
+   "tts_gaps": [
+    0.0,
+    0.32
+   ],
+   "shots": [
+    {
+     "src": "press",
+     "in": 24.0,
+     "speed": 1.0,
+     "fade_in": 1.0,
+     "crop": {
+      "from": [
+       0.5,
+       0.8,
+       0.45
+      ],
+      "to": [
+       0.5,
+       0.3,
+       0.42
+      ]
+     },
+     "grade": {
+      "gamma": 1.45,
+      "contrast": 1.1
+     }
+    }
+   ]
+  },
+  {
+   "n": 2,
+   "name": "The fire",
+   "cut": 3.733,
+   "text": "Two. The fire.",
+   "tts": [
+    "Two.",
+    "The fire."
+   ],
+   "tts_gaps": [
+    0.0,
+    0.32
+   ],
+   "shots": [
+    {
+     "src": "press",
+     "in": 42.2,
+     "speed": 0.75,
+     "crop": {
+      "from": [
+       0.5,
+       0.78,
+       0.5
+      ],
+      "to": [
+       0.5,
+       0.74,
+       0.42
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "n": 3,
+   "name": "Liftoff",
+   "cut": 6.067,
+   "text": "Three. A million parts… rising as one.",
+   "tts": [
+    "Three.",
+    "A million parts...",
+    "rising as one."
+   ],
+   "tts_gaps": [
+    0.0,
+    0.3,
+    0.28
+   ],
+   "shots": [
+    {
+     "src": "press",
+     "in": 52.0,
+     "speed": 0.8,
+     "crop": {
+      "from": [
+       0.5,
+       0.62,
+       0.6
+      ],
+      "to": [
+       0.5,
+       0.45,
+       0.5
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "n": 4,
+   "name": "Letting go",
+   "cut": 10.667,
+   "text": "Four. Letting go.",
+   "tts": [
+    "Four.",
+    "Letting go."
+   ],
+   "tts_gaps": [
+    0.0,
+    0.32
+   ],
+   "shots": [
+    {
+     "src": "rocketcam",
+     "in": 10.0,
+     "speed": 0.8,
+     "crop": {
+      "from": [
+       0.5,
+       0.5,
+       1.0
+      ],
+      "to": [
+       0.5,
+       0.5,
+       0.9
+      ]
+     },
+     "pre": "colorbalance=gm=-0.08:rm=0.03"
+    }
+   ]
+  },
+  {
+   "n": 5,
+   "name": "The sky turns black",
+   "cut": 13.233,
+   "text": "Five. The sky turns black…",
+   "tts": [
+    "Five.",
+    "The sky turns black..."
+   ],
+   "tts_gaps": [
+    0.0,
+    0.32
+   ],
+   "shots": [
+    {
+     "src": "sunset",
+     "in": 6.0,
+     "speed": 0.85,
+     "crop": {
+      "from": [
+       0.5,
+       0.5,
+       1.0
+      ],
+      "to": [
+       0.5,
+       0.5,
+       0.9
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "n": 6,
+   "name": "The Earth turns blue",
+   "cut": 16.467,
+   "text": "Six. …and the Earth turns blue.",
+   "tts": [
+    "Six.",
+    "and the Earth turns blue."
+   ],
+   "tts_gaps": [
+    0.0,
+    0.32
+   ],
+   "shots": [
+    {
+     "src": "esa",
+     "in": 190.0,
+     "speed": 0.8,
+     "crop": {
+      "from": [
+       0.5,
+       0.35,
+       1.0
+      ],
+      "to": [
+       0.5,
+       0.35,
+       0.9
+      ]
+     },
+     "dissolve": 0.6,
+     "grade": {
+      "gamma": 0.82,
+      "sat": 0.85
+     }
+    }
+   ]
+  },
+  {
+   "n": 7,
+   "name": "Wings",
+   "cut": 19.533,
+   "text": "Seven. Wings… open to the Sun.",
+   "tts": [
+    "Seven.",
+    "Wings...",
+    "open to the Sun."
+   ],
+   "tts_gaps": [
+    0.0,
+    0.3,
+    0.28
+   ],
+   "shots": [
+    {
+     "src": "orion",
+     "in": 44.0,
+     "speed": 0.9,
+     "crop": {
+      "from": [
+       0.6,
+       0.75,
+       0.8
+      ],
+      "to": [
+       0.6,
+       0.72,
+       0.7
+      ]
+     },
+     "grade": {
+      "gamma": 0.88
+     }
+    }
+   ]
+  },
+  {
+   "n": 8,
+   "name": "A new eye",
+   "cut": 23.467,
+   "text": "Eight. A new eye on our world.",
+   "tts": [
+    "Eight.",
+    "A new eye on our world."
+   ],
+   "tts_gaps": [
+    0.0,
+    0.32
+   ],
+   "shots": [
+    {
+     "src": "esa",
+     "in": 945.0,
+     "speed": 0.7,
+     "crop": {
+      "from": [
+       0.5,
+       0.4,
+       1.0
+      ],
+      "to": [
+       0.5,
+       0.45,
+       0.9
+      ]
+     },
+     "dissolve": 0.6,
+     "grade": {
+      "gamma": 0.82,
+      "sat": 0.85
+     }
+    }
+   ]
+  },
+  {
+   "n": 9,
+   "name": "Built by your hands",
+   "cut": 26.8,
+   "text": "Nine. Built by your hands.",
+   "tts": [
+    "Nine.",
+    "Built by your hands."
+   ],
+   "tts_gaps": [
+    0.0,
+    0.32
+   ],
+   "shots": [
+    {
+     "src": "orion",
+     "in": 31.0,
+     "speed": 0.8,
+     "crop": {
+      "from": [
+       0.45,
+       0.4,
+       0.9
+      ],
+      "to": [
+       0.45,
+       0.4,
+       0.8
+      ]
+     },
+     "grade": {
+      "gamma": 0.95
+     }
+    }
+   ]
+  },
+  {
+   "n": 10,
+   "name": "Welcome to First Light",
+   "cut": 29.8,
+   "text": "Ten. Welcome to First Light.",
+   "tts": [
+    "Ten.",
+    "Welcome to First Light."
+   ],
+   "tts_gaps": [
+    0.0,
+    0.85
+   ],
+   "shots": [
+    {
+     "src": "esa",
+     "in": 785.0,
+     "speed": 0.7,
+     "fade_in": 0.6,
+     "crop": {
+      "from": [
+       0.5,
+       0.5,
+       1.0
+      ],
+      "to": [
+       0.5,
+       0.5,
+       0.9
+      ]
+     },
+     "grade": {
+      "gamma": 0.82,
+      "sat": 0.85
+     }
+    }
+   ]
+  }
+ ],
+ "crf": 21,
+ "grade": {
+  "curve": "0/0.012 0.25/0.215 0.5/0.5 0.75/0.79 1/0.99",
+  "shadows": [
+   -0.03,
+   0.0,
+   0.05
+  ],
+  "highlights": [
+   0.05,
+   0.015,
+   -0.05
+  ],
+  "saturation": 1.08,
+  "vignette": 0.5,
+  "grain": 5
+ },
+ "fades_to_black": [
+  {
+   "start": 29.2,
+   "dur": 0.6
+  },
+  {
+   "start": 30.5,
+   "dur": 3.5,
+   "peak": 0.93,
+   "hold": true
+  }
+ ]
+}

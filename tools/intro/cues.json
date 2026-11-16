@@ -1,0 +1,95 @@
+{
+  "duration": 34.0,
+  "title_card_start": 31.4,
+  "fps": 30,
+  "video": "assets/video/intro.mp4",
+  "audio": {
+    "voice": "assets/audio/intro_voice.mp3",
+    "music": "assets/audio/intro_music.mp3",
+    "sfx": "assets/audio/intro_sfx.mp3"
+  },
+  "subtitles": "assets/subtitles/intro.en.vtt",
+  "voice_source": "kokoro:af_nicole@0.9",
+  "beats": [
+    {
+      "beat": 1,
+      "name": "The silence",
+      "cut": 0.4,
+      "vo_start": 0.5,
+      "vo_end": 2.437,
+      "subtitle": "One. The silence."
+    },
+    {
+      "beat": 2,
+      "name": "The fire",
+      "cut": 3.733,
+      "vo_start": 3.833,
+      "vo_end": 5.617,
+      "subtitle": "Two. The fire."
+    },
+    {
+      "beat": 3,
+      "name": "Liftoff",
+      "cut": 6.067,
+      "vo_start": 6.167,
+      "vo_end": 10.159,
+      "subtitle": "Three. A million parts… rising as one."
+    },
+    {
+      "beat": 4,
+      "name": "Letting go",
+      "cut": 10.667,
+      "vo_start": 10.767,
+      "vo_end": 12.773,
+      "subtitle": "Four. Letting go."
+    },
+    {
+      "beat": 5,
+      "name": "The sky turns black",
+      "cut": 13.233,
+      "vo_start": 13.333,
+      "vo_end": 16.086,
+      "subtitle": "Five. The sky turns black…"
+    },
+    {
+      "beat": 6,
+      "name": "The Earth turns blue",
+      "cut": 16.467,
+      "vo_start": 16.567,
+      "vo_end": 19.172,
+      "subtitle": "Six. …and the Earth turns blue."
+    },
+    {
+      "beat": 7,
+      "name": "Wings",
+      "cut": 19.533,
+      "vo_start": 19.633,
+      "vo_end": 23.054,
+      "subtitle": "Seven. Wings… open to the Sun."
+    },
+    {
+      "beat": 8,
+      "name": "A new eye",
+      "cut": 23.467,
+      "vo_start": 23.567,
+      "vo_end": 26.395,
+      "subtitle": "Eight. A new eye on our world."
+    },
+    {
+      "beat": 9,
+      "name": "Built by your hands",
+      "cut": 26.8,
+      "vo_start": 26.9,
+      "vo_end": 29.357,
+      "subtitle": "Nine. Built by your hands."
+    },
+    {
+      "beat": 10,
+      "name": "Welcome to First Light",
+      "cut": 29.8,
+      "vo_start": 29.9,
+      "vo_end": 33.144,
+      "subtitle": "Ten. Welcome to First Light."
+    }
+  ]
+}
