@@ -150,6 +150,49 @@
 
 .mode-bar { display: inline-flex; align-items: center; gap: 1.1rem; padding: 0.65rem 0.75rem 0.65rem 1.3rem; border-radius: 16px; }
 
+/* Battery flow row (charging / draining) and the safe-mode lock on the mode bar */
+.sun-chip { display: inline-flex; align-items: center; gap: 0.3rem; margin-left: 0.7rem; padding: 0.12rem 0.6rem 0.12rem 0.45rem; border-radius: 999px; font-size: var(--fs-micro); font-weight: 600; letter-spacing: 0.04em; vertical-align: 0.1em; background: var(--night-line); color: rgba(241, 236, 226, 0.85); }
+.sun-chip .icon { width: 0.95rem; height: 0.95rem; stroke-width: 2; }
+.sun-chip[data-lit='false'] { background: rgba(46, 90, 172, 0.35); color: var(--paper); }
+.power { display: flex; align-items: center; gap: 0.55rem; margin-top: 0.55rem; font-size: var(--fs-small); }
+.power__word { font-weight: 600; }
+.power__watts { margin-left: auto; color: rgba(241, 236, 226, 0.65); font-variant-numeric: tabular-nums; }
+.power__arrow { width: 1.2rem; height: 1.2rem; stroke-width: 2.2; transition: transform 300ms var(--ease-out); }
+.power[data-trend='in'] .power__arrow { transform: rotate(-90deg); }
+.power[data-trend='out'] .power__arrow { transform: rotate(90deg); color: #f0b45a; }
+.power[data-trend='hold'] .power__arrow { transform: none; opacity: 0.6; }
+.mode-bar.is-safe { border-color: rgba(216, 56, 44, 0.75); box-shadow: var(--shadow-pop), 0 0 0 1.5px rgba(216, 56, 44, 0.5); }
+.mode-bar__safe { display: inline-flex; align-items: center; gap: 0.5rem; color: #f4a39a; font-size: var(--fs-small); }
+.mode-bar__safe[hidden] { display: none; }
+.mode-bar__safe .icon { width: 1.25rem; height: 1.25rem; stroke-width: 2; }
+.mode-bar__countdown { color: var(--paper); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* ---------- Orbit operations layout ---------- */
+.screen.orbit-layout { padding: 0; align-items: stretch; justify-content: flex-start; text-align: left; }
+.orbit-left { position: absolute; top: var(--margin); left: var(--margin); display: flex; flex-direction: column; align-items: flex-start; gap: 0.8rem; }
+.orbit-layout .timeline { position: absolute; top: var(--margin); right: var(--margin); }
+.orbit-layout .mode-bar { position: absolute; bottom: calc(var(--margin) + 4vh + 6.2rem); left: 50%; translate: -50% 0; }
+.warp-bar { display: inline-flex; align-items: center; gap: 0.7rem; padding: 0.55rem 0.8rem 0.55rem 1.1rem; border-radius: 16px; }
+.warp-bar .key { height: 1.7rem; min-width: 1.7rem; font-size: max(15px, 0.82rem); }
+.world-labels { position: absolute; inset: 0; overflow: hidden; }
+.world-label {
+  position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.3rem 0.75rem 0.3rem 0.6rem; border-radius: 10px; white-space: nowrap;
+  font-size: var(--fs-small); font-weight: 600;
+}
+.world-label[hidden] { display: none; }
+.world-label .icon { width: 1.1rem; height: 1.1rem; stroke-width: 2; }
+.guide-wrap { position: absolute; inset: 0; display: grid; place-items: center; padding: var(--margin); background: rgba(3, 5, 9, 0.55); pointer-events: auto; }
+.guide { width: min(46rem, 100%); text-align: left; }
+.guide__modes { list-style: none; margin: 1.1rem 0 1.3rem; padding: 0; display: flex; flex-direction: column; gap: 1.1rem; }
+.guide__mode { display: grid; grid-template-columns: 2rem 1fr; gap: 1rem; align-items: start; }
+.guide__mode .key { margin-top: 0.15rem; }
+.guide__text { display: flex; flex-direction: column; gap: 0.15rem; line-height: 1.45; }
+.guide__text b { font-size: 1.15rem; font-weight: 600; letter-spacing: 0.02em; }
+.guide__text span { color: var(--ink-2); font-size: var(--fs-small); }
+.guide__tip { margin: 1.1rem 0 1.5rem; color: var(--ink-2); font-size: var(--fs-small); line-height: 1.8; }
+.guide__tip .key { vertical-align: middle; margin: 0 0.1rem; }
+
 /* ---------- Build sheet (hangar, night card, top-right) ---------- */
 .sheet { position: absolute; top: var(--margin); right: var(--margin); width: min(22rem, 42vw); padding: 1.05rem 1.3rem 1.2rem; text-align: left; }
 .sheet__head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }

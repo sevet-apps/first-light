@@ -356,6 +356,7 @@ html, body {
 .segmented__opt:not(.is-active):hover { color: var(--paper); }
 .segmented:not(.segmented--night) .segmented__opt:not(.is-active):hover { color: var(--ink); }
 .segmented__opt.is-active { color: var(--seg-text-on); }
+.segmented.is-locked .segmented__opt { cursor: not-allowed; }
 .segmented__opt:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(216, 56, 44, 0.45); }
 .segmented__opt .key {
   height: 1.55rem; min-width: 1.55rem;

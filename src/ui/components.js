@@ -97,8 +97,10 @@ export function segmented(options, value, onChange, { night = false, keys = null
     group.append(b);
     return b;
   });
+  let locked = false;
   const place = () => {
-    const active = buttons[options.indexOf(value)];
+    const active = locked ? null : buttons[options.indexOf(value)];
+    thumb.style.opacity = active ? '' : '0';
     if (!active || !active.offsetWidth) return;
     thumb.style.width = `${active.offsetWidth}px`;
     thumb.style.transform = `translateX(${active.offsetLeft}px)`;
@@ -106,7 +108,7 @@ export function segmented(options, value, onChange, { night = false, keys = null
   function select(opt, user) {
     value = opt;
     buttons.forEach((b, i) => {
-      const on = options[i] === opt;
+      const on = !locked && options[i] === opt;
       b.classList.toggle('is-active', on);
       b.setAttribute('aria-checked', String(on));
     });
@@ -116,6 +118,14 @@ export function segmented(options, value, onChange, { night = false, keys = null
   select(value, false);
   new ResizeObserver(place).observe(group);
   group.select = (opt) => select(opt, false);
+  /** Lock the control (no highlighted option, nothing clickable), e.g. while the spacecraft is in safe mode. */
+  group.lock = (on) => {
+    if (on === locked) return;
+    locked = on;
+    group.classList.toggle('is-locked', on);
+    buttons.forEach((b) => { b.disabled = on; });
+    select(value, false);
+  };
   return group;
 }
 
