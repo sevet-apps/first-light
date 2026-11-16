@@ -70,7 +70,7 @@ def stereo_pan(v, p):
 
 def main():
     edl = load_edl()
-    n = int(round(edl["duration"] * SR))
+    n = int(round(edl["audio_duration"] * SR))
     rng = np.random.default_rng(11)
     cut = {b["n"]: b["cut"] for b in edl["beats"]}
     title = edl["title_card_start"]
@@ -86,13 +86,15 @@ def main():
         (cut[7], cut[8] + 0.8, [35, 42, 49, 50, 54, 57], 0.85),          # Bm9 - wings
         (cut[8] - 0.4, cut[9] + 0.2, [31, 38, 47, 50, 55, 59], 0.95),    # G - a new eye
         (cut[9] - 0.2, title, [33, 40, 45, 50, 52, 57], 1.0),            # Asus - built by your hands
-        (title - 0.05, edl["duration"] + 1, [38, 45, 50, 54, 57, 62, 64], 1.15),   # D add9 - resolve
+        (title - 0.05, 35.2, [38, 45, 50, 54, 57, 62, 64], 0.6),   # D add9 - resolve
     ]
     bed = np.zeros((n, 2))
-    bright = smooth_env(n, [(0, 0.15), (6, 0.35), (cut[5], 0.05), (cut[6] + 1, 0.5), (title, 1.0), (edl["duration"], 0.5)])
+    bright = smooth_env(n, [(0, 0.15), (6, 0.35), (cut[5], 0.05), (cut[6] + 1, 0.5), (title, 1.0), (35.2, 0.5)])
     for s, e, notes, lvl in chords:
-        a = max(1.6, (e - s) * 0.3)
-        env = np.clip((t - s) / a, 0, 1) * np.clip((e - t) / a, 0, 1)
+        a = r = max(1.6, (e - s) * 0.3)
+        if s >= title - 0.1:                      # the resolve blooms with the impact, then rings out
+            a, r = 0.7, 3.0
+        env = np.clip((t - s) / a, 0, 1) * np.clip((e - t) / r, 0, 1)
         i0, i1 = int(max(0, s) * SR), min(n, int((e + 0.05) * SR))
         bed += pad(n, notes, np.sin(env * np.pi / 2) ** 2 * lvl, bright, rng, (i0, i1))
 
@@ -133,8 +135,9 @@ def main():
     drop = np.sin(2 * np.pi * np.cumsum(32 + 38 * np.exp(-ti / 0.12)) / SR) * np.exp(-ti / 1.3) * np.minimum(1, ti / 0.006)
     thud = signal.sosfilt(butter("lowpass", 160, 2), np.random.default_rng(9).standard_normal(len(ti)))
     thud *= np.exp(-ti / 0.35) * np.minimum(1, ti / 0.004)
-    hit = drop * 1.3 + thud * 0.6
-    add_at(sub, stereo_pan(hit, 0.5), title)
+    hit = drop * 2.4 + thud * 1.1
+    impact = np.zeros((n, 2))
+    add_at(impact, stereo_pan(hit, 0.5), title)   # kept out of the VO duck so it lands at full weight
     add_at(wet, stereo_pan(drop * 0.25, 0.5), title)
 
     # ---- long convolution reverb on the bed and motif; sub stays dry
@@ -148,9 +151,10 @@ def main():
     mix = chain(mix, butter("highpass", 28, 2), biquad("lowshelf", 120, 1.5, 0.7), biquad("highshelf", 6500, -3.0, 0.7))
     k = int(0.02 * SR)
     mix[:k] *= np.linspace(0, 1, k)[:, None]
-    k = int(0.3 * SR)
-    mix[-k:] *= np.linspace(1, 0, k)[:, None]
-    mix *= undb(MUSIC_LUFS - integrated_lufs(mix))
+    k = int(1.5 * SR)                            # reverb tail has decayed; fade the last bit to true silence
+    mix[-k:] *= np.cos(np.linspace(0, np.pi / 2, k))[:, None] ** 2
+    g = undb(MUSIC_LUFS - integrated_lufs(mix))
+    mix *= g
 
     # ---- duck -6 dB under each voice-over line (smooth, no pumping clicks)
     tl = json.loads((WORK / "voice_timeline.json").read_text(encoding="utf-8"))["lines"]
@@ -161,6 +165,7 @@ def main():
     duck = signal.fftconvolve(duck, np.hanning(k) / np.hanning(k).sum(), mode="same")
     mix *= (1 - duck * (1 - undb(-6)))[:, None]
 
+    mix += chain(impact, butter("highpass", 28, 2)) * g * 2.2
     sf.write(str(WORK / "stem_music.wav"), mix, SR, subtype="FLOAT")
     print(f"music stem: {integrated_lufs(mix):.1f} LUFS, peak {20 * np.log10(np.abs(mix).max()):.1f} dBFS")
 

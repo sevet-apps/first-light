@@ -144,7 +144,7 @@ def main():
         raw = synth_kokoro(edl)
         source = f"kokoro:{VOICE}@{SPEED}"
 
-    total = int(round(edl["duration"] * SR))
+    total = int(round(edl["audio_duration"] * SR))
     stem = np.zeros((total, 2))
     timeline = []
     for i, (beat, x) in enumerate(zip(edl["beats"], raw)):

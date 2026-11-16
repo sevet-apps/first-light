@@ -52,7 +52,7 @@ def sweep_whoosh(dur, f0, f1, seed, peak=0.5, tail=0.35):
 
 def main():
     edl = load_edl()
-    n = int(round(edl["duration"] * SR))
+    n = int(round(edl["audio_duration"] * SR))
     cut = {b["n"]: b["cut"] for b in edl["beats"]}
     title = edl["title_card_start"]
     out = np.zeros((n, 2))
@@ -103,7 +103,7 @@ def main():
 
     # ---- space: a very soft airy texture under the orbital shots, gone near the title
     space = chain(noise2(n, 20), butter("highpass", 2500, 2), butter("lowpass", 9000, 2))
-    out += space * env_curve(n, [(cut[5] + 0.5, 0), (cut[6] + 0.5, 0.0035), (cut[9], 0.0045), (29.2, 0.0), (title - 0.5, 0)])[:, None]
+    out += space * env_curve(n, [(cut[5] + 0.5, 0), (cut[6] + 0.5, 0.0035), (cut[9], 0.0045), (29.2, 0.0), (title - 0.5, 0.0), (title + 0.8, 0.0045), (36.0, 0.003), (37.6, 0)])[:, None]
     hum = np.sin(2 * np.pi * 55 * t) * env_curve(n, [(cut[6], 0), (cut[6] + 1.5, 0.012), (29.2, 0.012), (30.0, 0)])
     out += np.stack([hum, hum], axis=1)
 

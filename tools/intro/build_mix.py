@@ -41,6 +41,7 @@ def write_subtitles(edl, timeline):
 def write_cues(edl, timeline):
     cues = {
         "duration": edl["duration"],
+        "audioEnd": edl["audio_duration"],
         "title_card_start": edl["title_card_start"],
         "fps": edl["fps"],
         "video": "assets/video/intro.mp4",
@@ -62,7 +63,7 @@ def soft_limit(x, thr=0.45, ceil=0.8):
 
 def main():
     edl = load_edl()
-    n = int(round(edl["duration"] * SR))
+    n = int(round(edl["audio_duration"] * SR))
     stems = {s: fit_length(read_audio(WORK / f"stem_{s}.wav"), n) for s in STEMS}
     timeline = json.loads((WORK / "voice_timeline.json").read_text(encoding="utf-8"))["lines"]
 
