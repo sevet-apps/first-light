@@ -37,6 +37,7 @@ export function createOrbitSim(assembly, mission, { seed = 1 } = {}) {
     deliveredMB: 0, dataLostMB: 0, safeRemaining: 0,
     sunlit: true, target: null, pass: null, powerIn: 0, powerOut: base,
     batteryLow: false, memoryFull: false, closed: false, safeEpisode: false,
+    drain: null, // the latest IMAGE / DOWNLINK stretch: { mode, t, eclipse }, so a later safe mode can name what emptied the battery
   };
   const stats = {
     safeModeCount: 0, targetMinutes: 0, missedTargetMinutes: 0, passMinutes: 0, unusedPassMinutes: 0,
@@ -69,13 +70,14 @@ export function createOrbitSim(assembly, mission, { seed = 1 } = {}) {
     const repeat = s.safeEpisode;
     s.safeEpisode = true;
     if (!repeat) stats.safeModeCount++;
-    note('safe_mode', t, { repeat, modeBefore, eclipse: !s.sunlit, inTarget: !!s.target, inPass: !!s.pass, target: s.target?.name, pass: s.pass?.name });
+    note('safe_mode', t, { repeat, modeBefore, drain: s.drain, eclipse: !s.sunlit, inTarget: !!s.target, inPass: !!s.pass, target: s.target?.name, pass: s.pass?.name });
   }
 
   function tick() {
     const t = s.tick * STEP;
     syncEnvironment(t);
     const mode = s.mode;
+    if (mode === 'IMAGE' || mode === 'DOWNLINK') s.drain = { mode, t, eclipse: !s.sunlit };
     const solarFactor = !s.sunlit ? 0 : mode === 'IMAGE' || mode === 'DOWNLINK' ? pointingSolarFraction : 1;
     s.powerIn = solarW * solarFactor;
     s.powerOut = base + (mode === 'IMAGE' ? parts.instrument.stats.powerW : 0) + (mode === 'DOWNLINK' ? parts.antenna.stats.powerW : 0);

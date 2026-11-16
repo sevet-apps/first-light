@@ -176,6 +176,12 @@ export async function runSimTests() {
     return r.reasons.some((x) => /Battery ran flat/.test(x)) && r.suggestions.some((x) => /battery|SUN-POINT/i.test(x));
   })());
 
+  expect('fastlink', 'safe mode in SUN-POINT names the activity that drained the battery', (() => {
+    const first = fly(presets.fastlink, 'greedy').reasons[1];
+    return /base systems after downlinking through the eclipse/.test(first);
+  })(), fly(presets.fastlink, 'greedy').reasons[1]);
+  expect('underpowered', 'safe mode with no earlier drain keeps the plain base-systems wording', /while running only its base systems in SUN-POINT/.test(fly(presets.underpowered, 'idle').reasons[1]));
+
   // bigsolar: reported only, but its debrief must be readable
   const bsr = fly(presets.bigsolar, 'greedy');
   expect('bigsolar', 'integrable and has a headline plus explanations', ready('bigsolar').canIntegrate && bsr.reasons.length >= 1 && bsr.positives.length >= 1,

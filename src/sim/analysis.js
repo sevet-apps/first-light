@@ -5,6 +5,16 @@ import { starsFor } from '../data/mission.js';
 import { evaluateAssembly } from './assembly.js';
 
 const MODE_ACTIVITY = { SUN: 'running only its base systems in SUN-POINT', IMAGE: 'imaging', DOWNLINK: 'downlinking', SAFE: 'in safe mode' };
+const MODE_GERUND = { IMAGE: 'imaging', DOWNLINK: 'downlinking' };
+const RECENT_DRAIN_MIN = 40; // an IMAGE / DOWNLINK stretch this recent (about one eclipse) still explains a safe mode in SUN-POINT
+
+/** What the satellite was doing when the battery ran flat; in SUN-POINT it names the activity that drained it earlier. */
+function activityBefore(event) {
+  const { modeBefore, drain } = event;
+  if (modeBefore !== 'SUN' || !drain || event.t - drain.t > RECENT_DRAIN_MIN) return MODE_ACTIVITY[modeBefore];
+  return `running only its base systems after ${MODE_GERUND[drain.mode]}${drain.eclipse ? ' through the eclipse' : ''}`;
+}
+
 const UNUSED_PASS_NOTE_MIN = 12;
 const SLOW_LINK_GOAL_RATIO = 2; // a link that can carry under 2x the goal over all passes counts as slow
 const round1 = (n) => Math.round(n * 10) / 10;
@@ -48,7 +58,7 @@ function safeModeReasons(parts, mission, stats, log) {
   const first = events[0];
   const { battery, solar, bus } = parts;
   const where = first.eclipse ? 'the eclipse' : 'sunlight';
-  const doing = MODE_ACTIVITY[first.modeBefore];
+  const doing = activityBefore(first);
   const reasons = [
     `Battery ran flat during ${where} of orbit ${first.orbit + 1} while ${doing} (${battery.shortName}, ${battery.stats.capacityWh} Wh). `
     + `Safe mode then shut everything down for ${mission.ops.safeModeMinutes} minutes`
