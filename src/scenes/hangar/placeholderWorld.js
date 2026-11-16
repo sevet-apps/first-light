@@ -2,7 +2,7 @@
 // gameplay. Real Blender art (T8/T9) replaces this module; the scene only needs what it returns.
 import * as THREE from 'three';
 import { StaticBuilder, createMaterials, screenTexture, signUv } from './placeholderKit.js';
-import { buildParts } from './placeholderParts.js';
+import { buildParts } from '../shared/placeholderParts.js';
 import { buildIntegrationRig } from './integrationRig.js';
 
 const deg = (r) => (r * 180) / Math.PI;

@@ -1,7 +1,7 @@
 // Motion primitives for the assembly animations: a small timeline (timed events plus a per-frame update) and a
 // flight that carries the nodes of one part from a start pose to an end pose along an arc.
 import * as THREE from 'three';
-import { Pose } from './satellite.js';
+import { Pose } from '../shared/satellite.js';
 
 export const clamp01 = (x) => THREE.MathUtils.clamp(x, 0, 1);
 export const easeInOut = (t) => (t < 0.5 ? 4 * t ** 3 : 1 - ((-2 * t + 2) ** 3) / 2);

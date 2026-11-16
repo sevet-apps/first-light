@@ -3,6 +3,7 @@
 // hangar can replace it without touching gameplay code.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { createSatelliteMaterials } from '../shared/satelliteMaterials.js';
 
 const rad = (deg) => (deg * Math.PI) / 180;
 
@@ -194,9 +195,7 @@ export function createMaterials() {
     blueMat: std(0x2e5aac, 0.7),
     glass: std(0x9fc4dd, 0.1, 0, { transparent: true, opacity: 0.22, depthWrite: false }),
     wood: std(0x8c6a45, 0.85),
-    cardboard: std(0xb59a73, 0.9),
     red: std(0xb3322a, 0.5, 0.2),
-    orange: std(0xff6a1a, 0.7),
     navy: std(0x1d2a44, 0.8),
     concreteBase: std(0x6d747c, 0.9),
     cabinet: std(0x8b97a5, 0.5, 0.25),
@@ -204,15 +203,7 @@ export function createMaterials() {
     bottleBlue: std(0x2e5aac, 0.4, 0.3),
     bottleGreen: std(0x2f8f5b, 0.4, 0.3),
     bottleWhite: std(0xdadde0, 0.4, 0.3),
-    // Satellite parts
-    foil: std(0xe3b04c, 0.36, 0.5),
-    alu: std(0xc4cbd3, 0.35, 0.55),
-    aluDouble: std(0xc4cbd3, 0.35, 0.55, { side: THREE.DoubleSide }),
-    anodized: std(0x7b8798, 0.4, 0.5),
-    lens: std(0x0b1330, 0.1, 0.5),
-    cell: std(0x142a63, 0.3, 0.4),
-    cellGrid: std(0xc8d0da, 0.3, 0.8),
-    battery: std(0x23282f, 0.55, 0.3),
+    ...createSatelliteMaterials(),
     // Emissive
     led: glow(0xffffff, 2.2),
     ledWarm: glow(0xffd9a8, 1.8),

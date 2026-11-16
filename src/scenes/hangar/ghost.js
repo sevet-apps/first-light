@@ -8,7 +8,7 @@ const SIGNAL = new THREE.Color(0xd8382c);
 const PULSE_HZ = 0.55;
 
 export class Ghost {
-  /** @param {import('./satellite.js').Satellite} satellite */
+  /** @param {import('../shared/satellite.js').Satellite} satellite */
   constructor(satellite) {
     this.satellite = satellite;
     this.group = new THREE.Group();

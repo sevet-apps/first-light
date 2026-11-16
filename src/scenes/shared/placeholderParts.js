@@ -191,11 +191,42 @@ function mergeByMaterial(group) {
   return merged;
 }
 
-/** Build every rack part from the layout. Returns Map(partId -> root Group), already placed on its rack slot. */
-export function buildParts(layout, mat) {
+/** Unfolded solar array per catalog part: panels in a row per wing, each `length` along the wing and `width` across it. */
+const DEPLOYED = {
+  sol_2wing: { panels: 1, length: 1.5, width: 1.2 },
+  sol_4panel: { panels: 2, length: 1.3, width: 1.5 },
+};
+const BOOM_LENGTH = 0.35;
+const PANEL_GAP = 0.06;
+
+/**
+ * One wing of a deployed array, pointing along +X from its pivot: a boom, then flat panels (blue cells on both
+ * faces, thin grid lines). The panel plane is XZ, so rotating the pivot about X turns the cells towards the Sun.
+ * Returns null for parts without deployable wings.
+ */
+export function buildDeployedWing(mat, partId) {
+  const spec = DEPLOYED[partId];
+  if (!spec) return null;
+  const g = new THREE.Group();
+  const { panels, length, width } = spec;
+  g.add(mesh(new THREE.CylinderGeometry(0.03, 0.03, BOOM_LENGTH + 0.02, 10), mat.anodized, [BOOM_LENGTH / 2, 0, 0], [0, 0, Math.PI / 2]));
+  for (let i = 0; i < panels; i++) {
+    const x = BOOM_LENGTH + length / 2 + i * (length + PANEL_GAP);
+    g.add(box(mat.alu, length, 0.03, width, [x, 0, 0]));
+    for (const side of [-1, 1]) {
+      g.add(box(mat.cell, length - 0.08, 0.008, width - 0.08, [x, side * 0.0165, 0]));
+      for (let k = 1; k < 5; k++) g.add(box(mat.cellGrid, 0.012, 0.0095, width - 0.08, [x - length / 2 + 0.04 + ((length - 0.08) * k) / 5, side * 0.0165, 0]));
+    }
+  }
+  return mergeByMaterial(g);
+}
+
+/** Build the rack parts from the layout (all of them, or only `partIds`). Returns Map(partId -> root Group), placed on its rack slot. */
+export function buildParts(layout, mat, partIds = null) {
   const parts = new Map();
   for (const rack of layout.RACKS) {
     for (const slot of rack.slots) {
+      if (partIds && !partIds.includes(slot.partId)) continue;
       const root = new THREE.Group();
       root.name = slot.partId;
       root.userData.partId = slot.partId;

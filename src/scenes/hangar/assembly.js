@@ -14,7 +14,7 @@ import { Carry, loadFactor, speedMultiplierFor } from './carry.js';
 import { InstallFx } from './fx.js';
 import { Flight, Timeline, clamp01, easeInOut } from './flight.js';
 import { Ghost } from './ghost.js';
-import { Part, Pose, Satellite } from './satellite.js';
+import { Part, Pose, Satellite } from '../shared/satellite.js';
 
 // Seconds. Install = flight + settle + bolts (about 1.1 s); remove = unbolt + flight.
 const T = { pickup: 0.45, unbolt: 0.3, remove: 0.6, flight: 0.55, settle: 0.13, bolts: 0.4 };

@@ -1,7 +1,7 @@
 // Carrying: a part held in front-right of the camera on a spring, the weight model (speed and bob follow the mass)
 // and the "viewmodel" depth trick that keeps a held part from ever poking into walls or the near plane.
 import * as THREE from 'three';
-import { Pose } from './satellite.js';
+import { Pose } from '../shared/satellite.js';
 
 export const LIGHT_KG = 5; // at or below this the load costs nothing
 export const HEAVY_KG = 90; // the heaviest part (SB-90 bus)
