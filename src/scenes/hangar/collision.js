@@ -75,6 +75,11 @@ export class Collision {
     this.tmp = { x: 0, z: 0 };
   }
 
+  /** Drop the obstacle with this id (an object that left the world, like the fairing halves). */
+  remove(id) {
+    this.obstacles = this.obstacles.filter((o) => o.def.id !== id);
+  }
+
   /** Smallest distance from (x, z) to any obstacle or wall surface, and which one. */
   clearance(x, z) {
     const h = this.hall;

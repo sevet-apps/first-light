@@ -38,3 +38,11 @@ Props for scale and atmosphere (crates, carts, gas bottles, tool chests, cable r
 - `SOCKET_battery` — rear face (−Z), behind an access panel.
 
 Bus sizes: MB-40 0.6 × 0.8 × 0.6 m (w × h × d), SB-90 1.0 × 1.3 × 1.0 m.
+
+## Integration cinematic (T3c) — what the Blender models must match
+The choreography lives in `src/scenes/hangar/integration.js` (times, paths, camera shots, sound hooks); the numbers it needs are in `layout.js`.
+- **Payload adapter ring** (`PAYLOAD.ringR` 0.74 m, 0.1 m tall) stands on the encapsulation pedestal, whose top is `ENCAP.padY` = 1.04 m. Origin of the payload = underside of the ring; the satellite base sits on the ring top.
+- **Fairing halves** (`PAYLOAD.radius` 1.2 m, barrel 3.0 m + ogive 1.6 m): each half is open towards the axis and waits `PAYLOAD.openGap` = 1.4 m to the east / west of it, then translates along X to close. Two lifting lugs per half on the barrel top.
+- **Rocket top**: the upper stage ends in a 1.25 m radius payload deck at `ROCKET.payloadY` = 48.4 m; the closed fairing tip is at 53.1 m. The rocket has no nose of its own.
+- **Overhead crane**: rails along Z at x = ±`CRANE.railX`, y = `CRANE.railY`; the bridge girder (y = `bridgeY`) moves in Z, the trolley (y = `trolleyY`) in X, the hook block hangs on a cable and goes up to `hookMaxY`. Slings reach the lugs (payload) or a lifting ring round the satellite top.
+- Colliders `encap_half_w` / `encap_half_e` are removed from the world when the halves leave the cell.

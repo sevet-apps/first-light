@@ -20,7 +20,7 @@ export const REACH = { part: 3.0, station: 3.5 };
 export const SPAWN = { x: 0, z: 32, yawDeg: 0, pitchDeg: 12 }; // pitched up so the whole rocket is in view
 
 export const LAUNCHER = { x: 0, z: -22, w: 12, d: 12, h: 3 };
-export const ROCKET = { x: 0, z: -22, baseY: 3, tipY: 53, coreRadius: 1.85, boosterX: 3.2 };
+export const ROCKET = { x: 0, z: -22, baseY: 3, tipY: 53, coreRadius: 1.85, boosterX: 3.2, payloadY: 48.4 }; // payloadY: deck the payload adapter mates to
 export const TOWER = { x: -9, z: -22, w: 5, d: 5, platformsY: [12, 24, 36, 48] };
 
 export const CLEANROOM = { x0: 8, x1: 24, z0: -2, z1: 18 };
@@ -28,7 +28,12 @@ export const STAND = { x: 16, z: 8, radius: 1.2, topY: 1.0, socketBus: [16, 1.0,
 // Assembly: invisible hit volume over the stand and the satellite on it, and how far away you can aim at it.
 export const ASSEMBLY = { reach: 4.0, target: { w: 2.0, y0: 1.0, h: 2.6 } };
 export const CONSOLE = { x: 9, z: 8, w: 0.9, d: 2.4 }; // desk long side along Z, screen faces east
-export const ENCAP = { x: 9, z: -14, size: 5 };
+export const ENCAP = { x: 9, z: -14, size: 5, padY: 1.04 }; // padY: top of the pedestal the payload adapter stands on
+// The encapsulated payload: adapter ring, two fairing halves (open by `openGap` each side of the axis) and the
+// crane's sling height above the adapter. Tip of the closed fairing = payloadY + ringH + barrelH + noseH = 53.1 m.
+export const PAYLOAD = { ringR: 0.74, ringH: 0.1, radius: 1.2, barrelH: 3.0, noseH: 1.6, openGap: 1.4, hang: 6.0, satelliteHang: 1.3 };
+// Overhead bridge crane: rails along Z at railY, the bridge spans X, the trolley rides the bridge.
+export const CRANE = { railX: 26, railY: 60, bridgeY: 61.2, trolleyY: 59.4, hookMaxY: 57.2 };
 export const LAUNCH_CTL = { x: -12, z: 10, w: 3, d: 1, yawDeg: faceYaw(-12, 10, ROCKET.x, ROCKET.z) };
 
 export const RACK_TOP = 0.85;
@@ -154,7 +159,7 @@ export const STATIONS = {
 };
 
 export const layout = {
-  HALL, PLAYER, REACH, SPAWN, LAUNCHER, ROCKET, TOWER, CLEANROOM, STAND, ASSEMBLY, CONSOLE, ENCAP, LAUNCH_CTL,
+  HALL, PLAYER, REACH, SPAWN, LAUNCHER, ROCKET, TOWER, CLEANROOM, STAND, ASSEMBLY, CONSOLE, ENCAP, PAYLOAD, CRANE, LAUNCH_CTL,
   RACK_TOP, RACKS, PROPS, HUMAN, PART_SIZES, COLLIDERS, STATIONS, PARTITIONS, COLUMN_Z,
   sockets: { bus: STAND.socketBus },
   surfaceAt, faceYaw, forward,

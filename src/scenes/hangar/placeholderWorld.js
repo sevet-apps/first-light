@@ -3,14 +3,16 @@
 import * as THREE from 'three';
 import { StaticBuilder, createMaterials, screenTexture, signUv } from './placeholderKit.js';
 import { buildParts } from './placeholderParts.js';
+import { buildIntegrationRig } from './integrationRig.js';
 
 const deg = (r) => (r * 180) / Math.PI;
 const FLOOR_TILE_M = 6;
 const FOG_COLOR = 0x1b2634;
 
 /**
- * @returns {{ scene: THREE.Scene, parts: Map<string, THREE.Group>, stations: {console: THREE.Group, launch_ctl: THREE.Group} }}
- *   Parts are named by catalog id; the station groups are the interactable desks.
+ * @returns {{ scene: THREE.Scene, parts: Map<string, THREE.Group>, stations: {console: THREE.Group, launch_ctl: THREE.Group}, rig: object }}
+ *   Parts are named by catalog id; the station groups are the interactable desks; rig = crane + payload of the
+ *   integration cinematic (see integrationRig.js).
  */
 export function buildPlaceholderWorld(layout) {
   const scene = new THREE.Scene();
@@ -33,7 +35,9 @@ export function buildPlaceholderWorld(layout) {
   parts.forEach((p) => scene.add(p));
   const stations = { console: consoleDesk(mat, layout.CONSOLE), launch_ctl: launchDesk(mat, layout.LAUNCH_CTL) };
   Object.values(stations).forEach((s) => scene.add(s));
-  return { scene, parts, stations };
+  const rig = buildIntegrationRig(layout, mat);
+  scene.add(rig.group);
+  return { scene, parts, stations, rig };
 }
 
 function addAtmosphere(scene, layout) {
@@ -106,13 +110,8 @@ function roof(b, mat, layout) {
     b.box(mat.led, [48, 0.12, 0.28], [0, H.height - 2.5, z]);
   }
   for (const x of [-20, 0, 20]) b.box(mat.darkSteel, [0.6, 0.9, 80], [x, H.height - 1, 0]);
-  // Overhead bridge crane: rails along Z, a bridge girder over the rocket, trolley and hook block.
-  for (const x of [-26, 26]) b.box(mat.darkSteel, [0.5, 0.8, 76], [x, 60, 0]);
-  const z = layout.ROCKET.z;
-  b.box(mat.yellow, [53, 1.6, 1.4], [0, 61.2, z]);
-  b.box(mat.yellow, [3, 1.2, 3], [0, 59.4, z]);
-  b.cylinder(mat.darkSteel, 0.05, 0.05, 3, [0, 57.3, z]);
-  b.box(mat.yellow, [0.9, 1.2, 0.6], [0, 55.6, z]);
+  // Overhead bridge crane rails along Z; the bridge, trolley and hook are the moving rig (integrationRig.js).
+  for (const x of [-layout.CRANE.railX, layout.CRANE.railX]) b.box(mat.darkSteel, [0.5, 0.8, 76], [x, layout.CRANE.railY, 0]);
 }
 
 function catwalks(b, mat, layout) {
@@ -241,10 +240,10 @@ function launchComplex(b, mat, layout) {
   b.pop();
 
   tower(b, mat, T);
-  rocket(b, mat, R);
+  rocket(b, mat, R, layout);
 }
 
-function rocket(b, mat, R) {
+function rocket(b, mat, R, layout) {
   b.push(R.x, 0, R.z);
   const r = R.coreRadius;
   const y0 = R.baseY;
@@ -254,13 +253,10 @@ function rocket(b, mat, R) {
   for (let y = 6; y < 28; y += 4) b.cylinder(mat.steel, r + 0.012, r + 0.012, 0.05, [0, y, 0], null, 40);
   b.cylinder(mat.signalRed, r + 0.015, r + 0.015, 1.2, [0, 20.5, 0], null, 40);
   b.cylinder(mat.black, r + 0.015, r + 0.015, 4, [0, 8, 0], null, 40);
-  const nose = [];
-  const noseH = R.tipY - 47;
-  for (let i = 0; i <= 24; i++) {
-    const t = i / 24;
-    nose.push(new THREE.Vector2(Math.max(0.02, r * Math.pow(1 - Math.pow(t, 2.2), 0.55)), 47 + noseH * t));
-  }
-  b.add(mat.white, new THREE.LatheGeometry(nose, 40));
+  // The nose is the payload fairing, which the crane brings later: upper stage tapers to the payload deck.
+  const deckR = layout.PAYLOAD.radius + 0.05;
+  b.cylinder(mat.white, deckR, r, R.payloadY - 0.05 - 47, [0, (47 + R.payloadY - 0.05) / 2, 0], null, 40);
+  b.cylinder(mat.interstage, deckR, deckR, 0.1, [0, R.payloadY - 0.05, 0], null, 40);
   // Strap-on boosters.
   for (const sx of [-1, 1]) {
     const x = sx * R.boosterX;
@@ -311,15 +307,10 @@ function encapsulationCell(b, mat, layout) {
   const { ENCAP: E } = layout;
   b.push(E.x, 0, E.z);
   b.box(mat.darkSteel, [E.size, 0.04, E.size], [0, 0.02, 0]);
-  b.cylinder(mat.alu, 0.7, 0.7, 1.0, [0, 0.54, 0], null, 32);
-  b.cylinder(mat.orange, 0.74, 0.74, 0.1, [0, 1.07, 0], null, 32);
+  // Pedestal for the payload adapter (the adapter and the fairing halves are the moving rig); halves wait on cradles.
+  b.cylinder(mat.alu, 0.7, 0.7, E.padY, [0, E.padY / 2, 0], null, 32);
   b.cylinder(mat.darkSteel, 0.85, 0.85, 0.08, [0, 0.08, 0], null, 32);
-  // Open fairing halves standing on cradles, their open sides facing the adapter.
-  for (const side of [-1, 1]) {
-    const shell = new THREE.CylinderGeometry(1.2, 1.2, 4.5, 28, 1, true, side > 0 ? 0 : Math.PI, Math.PI);
-    b.add(mat.whiteDouble, shell, [side * 1.4, 2.4, 0]);
-    b.box(mat.darkSteel, [1.5, 0.3, 2.6], [side * 2.0, 0.15, 0]);
-  }
+  for (const side of [-1, 1]) b.box(mat.darkSteel, [1.5, 0.3, 2.6], [side * 2.0, 0.15, 0]);
   b.pop();
   signPost(b, mat, 'ENCAPSULATION', [E.x, E.z - 2.3], 0, 2.4, 1.8);
 }
