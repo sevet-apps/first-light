@@ -8,6 +8,8 @@ import { hintFor } from './hints.js';
 
 const TOAST_GAP_PX = 12;
 
+let focusExplained = false; // the focus-time toast appears once per session
+
 const MODE_GUIDE = [
   ['1', 'SUN-POINT', 'Panels face the Sun: full charging. Your resting mode, and the way to refill the battery before an eclipse.'],
   ['2', 'IMAGE', 'The instrument records, but only while a target window is open. Panels turn away: about half the power.'],
@@ -44,9 +46,12 @@ export function createOrbitHud(ctx, { mission, onMode, onWarp }) {
   const warpBar = el('div', 'night warp-bar');
   const warpSelect = segmented(WARPS.map((w) => `${w}×`), '1×', (label) => onWarp(parseInt(label, 10)), { night: true });
   warpBar.append(microLabel('Warp'), keyCap('[', { night: true }), warpSelect, keyCap(']', { night: true }));
+  const focusChip = el('div', 'night focus-chip', 'Focus · ½×');
+  focusChip.title = 'Time slows while a window is open';
+  focusChip.hidden = true;
   const labels = el('div', 'world-labels');
   const left = el('div', 'orbit-left');
-  left.append(kit.telemetry, warpBar);
+  left.append(kit.telemetry, warpBar, focusChip);
   screen.append(labels, left, kit.timeline, kit.modes);
 
   let guide = null;
@@ -68,7 +73,12 @@ export function createOrbitHud(ctx, { mission, onMode, onWarp }) {
       guide = null;
     },
 
-    update(state, upcoming, warp, { note = null, eclipseEndsIn = null } = {}) {
+    update(state, upcoming, warp, { note = null, eclipseEndsIn = null, focus = false } = {}) {
+      if (focus && focusChip.hidden && !focusExplained) {
+        focusExplained = true;
+        ctx.ui.toast('Focus time', { ms: 4200, detail: 'Time slows while a window is open.' });
+      }
+      focusChip.hidden = !focus;
       kit.update(state, upcoming);
       warpSelect.select(`${warp}×`);
       const hint = guide ? '' : note ?? hintFor(state, upcoming, { eclipseEndsIn });

@@ -344,7 +344,7 @@ export function debrief(result, { build = null, onRedesign = null, onFlyAgain = 
   left.append(microLabel('Debrief · LUMEN-1'), title);
   const primaryMet = result.objectives[0].met;
   const row = el('div', 'debrief__stars');
-  row.append(stars(result.objectives.map((o) => o.met && primaryMet)));
+  row.append(stars(result.stars)); // filled from the left; the objective rows above say which ones were met
   if (!primaryMet) row.append(el('p', 'debrief__starnote', 'Stars count once the primary goal is met.'));
   head.append(left, row);
 

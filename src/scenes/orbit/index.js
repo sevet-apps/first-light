@@ -128,9 +128,10 @@ export default {
     s.rig.update(dt, { x: 0, y: 0, z: 0 });
     s.world.update(state, dt, s.seconds, s.rig.camera);
     const eclipse = sim.schedule.eclipses.find((e) => state.t >= e.start && state.t < e.end);
-    s.hud.update(state, sim.upcoming(4), s.clock.warp, {
+    s.hud.update(state, sim.upcoming(4), s.clock.effectiveWarp, {
       note: s.ending ? 'Mission complete. Preparing the debrief.' : null,
       eclipseEndsIn: eclipse ? eclipse.end - state.t : null,
+      focus: s.clock.focus,
     });
 
     if (state.done && !s.ending) finishMission(s);
