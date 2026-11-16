@@ -99,6 +99,11 @@ export class Interaction {
     return true;
   }
 
+  /** Drop the focus (outline, prompt, card) while something else has the screen. refresh() brings it back. */
+  clear() {
+    this.#setFocus(null);
+  }
+
   /** Re-evaluate focus now (after a teleport or aim change) without advancing the fades. */
   refresh() {
     this.#setFocus(this.pick());

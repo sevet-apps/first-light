@@ -60,6 +60,7 @@ export class Assembly {
 
     this.carrying = null;
     this.busy = false;
+    this.locked = false; // set once the payload is integrated: the racks and the stand go quiet
     this.tasks = [];
     this.chip = null;
     this.nudge = 1e9;
@@ -108,6 +109,7 @@ export class Assembly {
     const part = this.parts.get(partId);
     if (!part) return { ok: false, reason: `Unknown part ${partId}.` };
     if (this.busy) return { ok: false, reason: 'Wait for the current action to finish.' };
+    if (this.locked) return { ok: false, reason: 'The payload is already integrated.' };
     if (this.carrying) return { ok: false, reason: 'Your hands are full.' };
     if (part.state !== 'rack') return { ok: false, reason: 'That part is not on its rack.' };
     this.objectives.walkDone({ immediate: true });
@@ -608,13 +610,13 @@ export class Assembly {
 
   #register() {
     const { interaction, layout } = this;
-    const handsFree = () => !this.carrying && !this.busy;
+    const handsFree = () => !this.carrying && !this.busy && !this.locked;
 
     for (const part of this.parts.values()) {
       const title = partTitle(part.def);
       interaction.register({
         object: part.root, kind: 'part', id: part.id, label: title, verb: 'Pick up', reach: layout.REACH.part,
-        enabled: () => part.state === 'rack' && !this.busy,
+        enabled: () => part.state === 'rack' && !this.busy && !this.locked,
         prompt: () => (this.carrying
           ? { key: 'Q', verb: 'Hands full — put back', label: this.carrying.def.shortName }
           : { key: 'E', verb: 'Pick up', label: title }),
@@ -636,7 +638,7 @@ export class Assembly {
     interaction.register({
       object: this.standTarget, kind: 'stand', id: 'stand', label: '', verb: 'Install', reach: layout.ASSEMBLY.reach,
       outline: false,
-      enabled: () => !!this.carrying && this.carrying.state === 'carried' && !this.busy,
+      enabled: () => !!this.carrying && this.carrying.state === 'carried' && !this.busy && !this.locked,
       prompt: () => {
         const part = this.carrying;
         const verdict = this.evaluate(part);

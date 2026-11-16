@@ -18,11 +18,12 @@ import debrief from './scenes/debrief.js';
 
 const SCENES = [title, intro, hangar, launch, orbit, debrief];
 
-// URL params: ?scene=<id> &debug=1 &selftest=1|assembly (hangar) &warp=<n> &assembly=<preset> &menu=pause|settings (test aid)
+// URL params: ?scene=<id> &debug=1 &selftest=1|assembly (hangar) &warp=<n> &assembly=<preset> &integrated=1 (hangar, after integration) &menu=pause|settings (test aid)
 const params = new URLSearchParams(location.search);
 state.params.debug = params.get('debug') === '1';
 state.params.warp = Number(params.get('warp')) || 1;
 state.params.assembly = params.get('assembly');
+state.params.integrated = params.get('integrated') === '1';
 state.params.selftest = params.get('selftest') === '1';
 state.params.assemblytest = params.get('selftest') === 'assembly';
 if (presets[state.params.assembly]) state.assembly = { ...presets[state.params.assembly] };
