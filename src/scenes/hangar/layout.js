@@ -47,6 +47,8 @@ function toWorld(rack, u, v = 0) {
 
 // Physical size [w, h, d] of each catalog part in metres (bus sizes from the layout contract).
 export const PART_SIZES = {
+  obc_1: [0.22, 0.14, 0.24],
+  adcs_1: [0.24, 0.28, 0.24],
   bus_micro: [0.6, 0.8, 0.6],
   bus_small: [1.0, 1.3, 1.0],
   inst_wfc: [0.3, 0.45, 0.3],
@@ -64,6 +66,7 @@ export const PART_SIZES = {
 // Racks. w runs along the rack, d is its depth, yawDeg is the direction the front faces.
 // Slots give each part's offset u along the rack; world positions are derived below.
 const RACK_DEFS = [
+  { id: 'rack_systems', label: 'FLIGHT SYSTEMS', category: 'avionics', x: 16, z: 16.8, w: 3.2, d: 1.0, yawDeg: 0, slots: [['obc_1', -0.65], ['adcs_1', 0.65]] },
   { id: 'rack_bus', label: 'BUSES', category: 'bus', x: 11, z: 14, w: 3.2, d: 1.0, yawDeg: 0, slots: [['bus_micro', -0.9], ['bus_small', 0.75]] },
   { id: 'rack_instrument', label: 'INSTRUMENTS', category: 'instrument', x: 21, z: 14, w: 3.2, d: 1.0, yawDeg: 0, slots: [['inst_wfc', -0.7], ['inst_hri', 0.7]] },
   { id: 'rack_solar', label: 'SOLAR ARRAYS', category: 'solar', x: 23.5, z: 6, w: 4.2, d: 1.0, yawDeg: 90, slots: [['sol_body', -1.3], ['sol_2wing', 0], ['sol_4panel', 1.3]] },
@@ -113,6 +116,7 @@ export const PARTITIONS = [[-2, 2], [5, 11], [14, 18]];
 /** Colliders in XZ. box: centre x,z, size w (local X) by d (local Z), yaw; circle: centre x,z, radius r.
  *  h = height, used for ray occlusion only (movement is 2D). */
 export const COLLIDERS = [
+  { id: 'highbay_door', shape: 'box', x: 0, z: 39.5, w: 26, d: 0.7, yawDeg: 0, h: 41.4 },
   { id: 'launcher', shape: 'box', x: LAUNCHER.x, z: LAUNCHER.z, w: LAUNCHER.w, d: LAUNCHER.d, yawDeg: 0, h: LAUNCHER.h },
   { id: 'tower', shape: 'box', x: TOWER.x, z: TOWER.z, w: TOWER.w, d: TOWER.d, yawDeg: 0, h: 52 },
   { id: 'stand', shape: 'circle', x: STAND.x, z: STAND.z, r: STAND.radius, h: STAND.topY },

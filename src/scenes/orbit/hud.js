@@ -40,7 +40,7 @@ function guidanceCard(onBegin) {
  * @param {object} ctx app context
  * @param {{ mission: object, onMode: (mode: string) => void, onWarp: (warp: number) => void }} options
  */
-export function createOrbitHud(ctx, { mission, onMode, onWarp }) {
+export function createOrbitHud(ctx, { mission, onMode, onWarp, onView, onExplore }) {
   const screen = ctx.ui.screen('orbit-layout');
   const kit = orbitHud({ goalMB: mission.goalMB, orbits: mission.orbit.orbits, onMode });
   const warpBar = el('div', 'night warp-bar');
@@ -52,14 +52,31 @@ export function createOrbitHud(ctx, { mission, onMode, onWarp }) {
   const labels = el('div', 'world-labels');
   const left = el('div', 'orbit-left');
   left.append(kit.telemetry, warpBar, focusChip);
-  screen.append(labels, left, kit.timeline, kit.modes);
+  const cameraBar = el('div', 'night orbit-camera');
+  const viewButton = button('Earth view · V', 'ghost', onView);
+  const exploreButton = button('Pause time · P', 'ghost', onExplore);
+  const cleanButton = button('Hide HUD · H', 'ghost', () => toggleHud());
+  cameraBar.append(viewButton, exploreButton, cleanButton,
+    el('span', 'orbit-camera__hint', 'Drag to orbit · Scroll to zoom'));
+  screen.append(labels, left, kit.timeline, kit.modes, cameraBar);
 
   let guide = null;
   let lastHint = '';
+  let lastToastTop = -1;
+  function toggleHud() {
+    const clean = screen.classList.toggle('is-cinematic');
+    cleanButton.textContent = clean ? 'Show HUD · H' : 'Hide HUD · H';
+  }
 
   return {
     labelLayer: labels,
+    toggleHud,
     get guideOpen() { return !!guide; },
+    setView(view) { viewButton.textContent = view === 'earth' ? 'Satellite view · V' : 'Earth view · V'; },
+    setExploring(value) {
+      exploreButton.textContent = value ? 'Resume mission · P' : 'Pause time · P';
+      exploreButton.classList.toggle('is-active', value);
+    },
 
     /** Show the guidance card; `onBegin` runs when the player confirms. */
     showGuidance(onBegin) {
@@ -88,7 +105,11 @@ export function createOrbitHud(ctx, { mission, onMode, onWarp }) {
       }
       // Toasts sit below the timeline card.
       const bottom = kit.timeline.getBoundingClientRect().bottom;
-      ctx.ui.root.style.setProperty('--toast-top', `${Math.round(bottom + TOAST_GAP_PX)}px`);
+      const toastTop = Math.round(bottom + TOAST_GAP_PX);
+      if (toastTop !== lastToastTop) {
+        ctx.ui.root.style.setProperty('--toast-top', `${toastTop}px`);
+        lastToastTop = toastTop;
+      }
     },
 
     setMode: (mode) => kit.selector.select(mode),

@@ -2,10 +2,10 @@
 // downlink to the ground station.
 import * as THREE from 'three';
 
-const BEAM_COLOR = 0xffc870;
-const LINK_COLOR = 0xfff1d6;
-const BEAM_SPREAD = 0.045; // base radius of the cone as a share of its length (about 8 m on the ground)
-const LINK_DOTS = 36;
+const BEAM_COLOR = 0x9fcddd;
+const LINK_COLOR = 0xece3d5;
+const BEAM_SPREAD = 0.026;
+const LINK_DOTS = 24;
 const DOT_SPEED = 0.55; // fraction of the link per second
 
 /** Cone from a point (apex at local origin) along +Z for one unit, scaled to the beam length each frame. */
@@ -29,7 +29,7 @@ const additive = (color, opacity, extra = {}) => new THREE.MeshBasicMaterial({
 export function createImagingBeam() {
   const group = new THREE.Group();
   group.visible = false;
-  const cone = new THREE.Mesh(beamGeometry(), additive(BEAM_COLOR, 0.36, { vertexColors: true }));
+  const cone = new THREE.Mesh(beamGeometry(), additive(BEAM_COLOR, 0.12, { vertexColors: true }));
   const scan = new THREE.Mesh(new THREE.RingGeometry(0.93, 1, 48), additive(BEAM_COLOR, 0.8));
   const footprint = new THREE.Mesh(new THREE.CircleGeometry(1, 40), additive(BEAM_COLOR, 0.28));
   group.add(cone, scan);
@@ -51,7 +51,7 @@ export function createImagingBeam() {
       scan.position.z = length * f;
       scan.scale.setScalar(BEAM_SPREAD * length * f + 0.2);
       scan.material.opacity = 0.9 * (1 - f * 0.6);
-      cone.material.opacity = 0.34 + 0.08 * Math.sin(seconds * 6);
+      cone.material.opacity = 0.09 + 0.025 * Math.sin(seconds * 3);
       ground.position.copy(to);
       normal.copy(to).sub(earthCentre).normalize();
       ground.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
@@ -81,10 +81,12 @@ export function createDownlink() {
       for (let i = 0; i < LINK_DOTS; i++) {
         const k = (i / LINK_DOTS + seconds * DOT_SPEED) % 1;
         p.lerpVectors(from, to, k);
-        positions.set([p.x, p.y, p.z], i * 3);
+        positions[i * 3] = p.x;
+        positions[i * 3 + 1] = p.y;
+        positions[i * 3 + 2] = p.z;
       }
       geometry.attributes.position.needsUpdate = true;
-      dots.material.size = 4.5 + 1.8 * Math.sin(seconds * 7);
+      dots.material.size = 3 + 0.45 * Math.sin(seconds * 3);
     },
     hide() {
       dots.visible = false;

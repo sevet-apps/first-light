@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FIRST LIGHT - audio compatibility tests</title>
+<style>
+  body { padding: 24px; background: #0b0f15; color: #d7e0ee; font: 16px/1.6 system-ui; }
+  .ok { color: #4fbf84; } .fail { color: #ee6a5f; }
+</style>
+<h1>Audio compatibility tests</h1>
+<p id="summary">Running...</p>
+<ul id="results"></ul>
+<script type="module">
+  import { runAudioTests } from './audio-tests.js';
+  const report = runAudioTests();
+  window.__audioTestResults = report;
+  const summary = document.getElementById('summary');
+  summary.textContent = `${report.allPass ? 'ALL PASS' : 'FAILURES'} - ${report.results.filter((r) => r.pass).length} of ${report.results.length}`;
+  summary.className = report.allPass ? 'ok' : 'fail';
+  for (const result of report.results) {
+    const row = document.createElement('li');
+    row.className = result.pass ? 'ok' : 'fail';
+    row.textContent = `${result.pass ? 'PASS' : 'FAIL'}: ${result.name}${result.detail ? ` — ${result.detail}` : ''}`;
+    document.getElementById('results').append(row);
+  }
+</script>
+</html>

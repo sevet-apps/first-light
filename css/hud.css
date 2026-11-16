@@ -169,9 +169,13 @@
 
 /* ---------- Orbit operations layout ---------- */
 .screen.orbit-layout { padding: 0; align-items: stretch; justify-content: flex-start; text-align: left; }
+.orbit-layout .night { -webkit-backdrop-filter: none; backdrop-filter: none; background-color: rgba(14,17,23,0.94); }
+.orbit-layout.is-cinematic :is(.orbit-left,.timeline,.mode-bar,.world-labels) { opacity: 0; pointer-events: none; }
+body:has(.orbit-layout.is-cinematic) :is(.subtitles,.toasts) { display: none; }
 .orbit-left { position: absolute; top: var(--margin); left: var(--margin); display: flex; flex-direction: column; align-items: flex-start; gap: 0.8rem; }
 .orbit-layout .timeline { position: absolute; top: var(--margin); right: var(--margin); }
-.orbit-layout .mode-bar { position: absolute; bottom: calc(var(--margin) + 4vh + 6.2rem); left: 50%; translate: -50% 0; }
+.orbit-layout .mode-bar { position: absolute; bottom: 9.3rem; left: 50%; translate: -50% 0; }
+body:has(.orbit-layout) .subtitles { bottom: 5.5rem; font-size: clamp(16px,1.1vw,20px); padding: 0.55rem 1rem; max-width: min(48rem,85vw); }
 .warp-bar { display: inline-flex; align-items: center; gap: 0.7rem; padding: 0.55rem 0.8rem 0.55rem 1.1rem; border-radius: 16px; }
 .warp-bar .key { height: 1.7rem; min-width: 1.7rem; font-size: max(15px, 0.82rem); }
 .focus-chip { display: inline-flex; align-items: center; padding: 0.4rem 0.9rem; border-radius: 12px; font-size: var(--fs-small); font-weight: 600; font-variant-numeric: tabular-nums; border-color: rgba(216, 56, 44, 0.6); }
@@ -184,6 +188,13 @@
 }
 .world-label[hidden] { display: none; }
 .world-label .icon { width: 1.1rem; height: 1.1rem; stroke-width: 2; }
+.world-label__action { display: block; font-size: 0.72rem; font-weight: 400; opacity: 0.75; }
+.world-label.is-active { border-color: rgba(241,236,226,0.8); box-shadow: 0 0 0 2px rgba(241,236,226,0.12); }
+.orbit-camera { position: absolute; left: 50%; bottom: 1.4rem; translate: -50% 0; display: flex; align-items: center; gap: 0.6rem; padding: 0.4rem 0.8rem; border-radius: 16px; white-space: nowrap; }
+.orbit-camera .btn { min-height: 2.4rem; padding: 0.45rem 0.8rem; color: var(--paper); }
+.orbit-camera .btn.is-active { background: rgba(241,236,226,0.16); }
+.orbit-camera__hint { font-size: 0.78rem; opacity: 0.65; }
+@media (max-width: 900px) { .orbit-camera__hint { display: none; } }
 .guide-wrap { position: absolute; inset: 0; display: grid; place-items: center; padding: var(--margin); background: rgba(3, 5, 9, 0.55); pointer-events: auto; }
 .guide { width: min(46rem, 100%); text-align: left; }
 .guide__modes { list-style: none; margin: 1.1rem 0 1.3rem; padding: 0; display: flex; flex-direction: column; gap: 1.1rem; }
@@ -202,7 +213,7 @@
 .sheet__title { margin: 0.3rem 0 0.8rem; font-size: 1.7rem; line-height: 1.1; }
 .sheet__slots { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.15rem; }
 .sheet__slot {
-  position: relative; display: grid; grid-template-columns: 1.9rem 5.6rem 1fr; align-items: center; gap: 0.7rem;
+  position: relative; display: grid; grid-template-columns: 1.9rem minmax(0,1fr) auto; align-items: center; gap: 0.65rem;
   margin: 0 -0.5rem; padding: 0.22rem 0.5rem; border-radius: 10px;
   color: rgba(241, 236, 226, 0.55); transition: color 300ms, background-color 300ms, box-shadow 300ms;
 }
@@ -243,6 +254,17 @@
 .sheet__label { color: rgba(241, 236, 226, 0.7); font-size: var(--fs-small); }
 .sheet__value { margin: 0; display: inline-flex; align-items: baseline; gap: 0.5rem; font-weight: 600; font-variant-numeric: tabular-nums; }
 .sheet__unit { font-weight: 400; color: rgba(241, 236, 226, 0.6); margin-left: -0.35rem; font-size: var(--fs-small); }
+@media (max-height: 850px) {
+  .sheet { padding: 0.75rem 1rem; }
+  .sheet__title { font-size: 1.4rem; margin-bottom: 0.5rem; }
+  .sheet__slot { grid-template-columns: 1.5rem minmax(0,1fr) auto; padding-block: 0.12rem; }
+  .sheet__badge { width: 1.5rem; height: 1.5rem; }
+  .sheet__badge .icon { width: 1rem; height: 1rem; }
+  .sheet .rule--night { margin: 0.55rem 0; }
+  .sheet__lines { gap: 0.2rem; }
+  .sheet__meters { gap: 0.65rem; }
+  .sheet .meter { gap: 0.35rem; }
+}
 
 /* Carry readout: replaces the controls hint while a part is in your hands. */
 .hud-bottom:has(.carry-chip) .hint-chip { display: none; }

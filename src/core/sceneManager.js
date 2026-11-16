@@ -73,7 +73,9 @@ export class SceneManager {
       this.current = null;
     }
     try {
+      await next.preload?.(this.ctx);
       await next.enter(this.ctx, params);
+      await renderer.warmUp();
     } catch (err) {
       console.error(`Scene "${id}" failed to enter`, err);
     }

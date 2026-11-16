@@ -7,7 +7,7 @@ import { presets } from '../../data/presets.js';
 import { BUS_SOCKETS } from '../../data/sockets.js';
 import { evaluateAssembly } from '../../sim/assembly.js';
 import { sheetFigures } from '../../ui/buildSheet.js';
-import { MIN_SPEED } from './carry.js';
+import { MIN_SPEED, speedMultiplierFor } from './carry.js';
 
 const EPS = 1e-4;
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -75,7 +75,7 @@ export async function runAssemblySelfTest(a, hangar, ctx) {
     const sheetNums = [...a.sheet.node.querySelectorAll('.meter__value')].map((n) => Number(n.dataset.value));
     check('sheet', `${name}: build sheet matches evaluateAssembly (mass ${totals.mass} kg, $${totals.cost} M)`,
       near(figures.mass, totals.mass) && near(figures.cost, totals.cost) && near(sheetNums[0], totals.mass) && near(sheetNums[1], totals.cost), sheetNums.join(' / '));
-    check('objective', `${name}: objective advances once everything is installed`, a.objectives.state.installed.length === 5);
+    check('objective', `${name}: objective advances once everything is installed`, a.objectives.state.installed.length === CATEGORIES.length);
   }
 
   // ---- 2. refused installs, with reasons
@@ -165,7 +165,7 @@ export async function runAssemblySelfTest(a, hangar, ctx) {
     await a.putBack({ instant: true });
   }
   check('weight', 'light parts (<= 5 kg) do not slow you', speeds.ant_uhf === 1, JSON.stringify(speeds));
-  check('weight', 'speed falls with mass, x0.6 at 90 kg', speeds.inst_wfc < 1 && speeds.inst_hri < speeds.inst_wfc && speeds.bus_micro < speeds.inst_hri && near(speeds.bus_small, 0.6, 0.001));
+  check('weight', 'speed falls with mass, x0.6 at 90 kg', speeds.inst_wfc < 1 && speeds.inst_hri < speeds.inst_wfc && speeds.bus_micro < speeds.inst_hri && speeds.bus_small < speeds.bus_micro && near(speedMultiplierFor(90), 0.6, 0.001));
 
   // ---- 6. deltas on the build sheet
   await a.autoAssemble('balanced');

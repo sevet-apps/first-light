@@ -34,8 +34,11 @@ export function installOrbitDebug(s, actions) {
     world: s.world,
     /** Camera rig: set distance / azimuth / elevation (radians) to frame a shot. */
     camera: s.rig,
+    setView: actions.setView,
+    explore: (value = true) => actions.explore(value),
     events,
     get state() { return sim.state; },
+    get exploring() { return s.exploring; },
     /** Close the guidance card and start the simulation. */
     begin: actions.begin,
     setMode: (mode) => actions.setMode(mode),

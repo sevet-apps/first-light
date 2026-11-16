@@ -9,6 +9,8 @@ const MAX_PITCH = THREE.MathUtils.degToRad(85);
 const BASE_FOV = 70;
 const RUN_FOV_KICK = 4;
 const TWO_PI = Math.PI * 2;
+const GRAVITY = 18; // m/s²; a short, responsive jump about 0.8 m high
+const JUMP_SPEED = 5.4;
 
 // Head bob: one cycle of the phase = one footstep, the camera is lowest when a foot lands.
 const BOB = {
@@ -36,6 +38,10 @@ export class Player {
 
     this.pos = { x: 0, z: 0 };
     this.vel = { x: 0, z: 0 };
+    this.height = 0;
+    this.verticalSpeed = 0;
+    this.grounded = true;
+    this.jumpHeld = false;
     this.yaw = 0;
     this.pitch = 0;
     this.speed = 0; // actual ground speed of the last step (m/s)
@@ -53,6 +59,9 @@ export class Player {
     this.pos.x = x;
     this.pos.z = z;
     this.vel.x = this.vel.z = 0;
+    this.height = this.verticalSpeed = 0;
+    this.grounded = true;
+    this.jumpHeld = false;
     this.speed = 0;
     this.yaw = THREE.MathUtils.degToRad(yawDeg);
     this.pitch = THREE.MathUtils.clamp(THREE.MathUtils.degToRad(pitchDeg), -MAX_PITCH, MAX_PITCH);
@@ -70,6 +79,9 @@ export class Player {
       yawDeg: THREE.MathUtils.radToDeg(this.yaw),
       pitchDeg: THREE.MathUtils.radToDeg(this.pitch),
       speed: this.speed,
+      grounded: this.grounded,
+      jumpHeight: this.height,
+      verticalSpeed: this.verticalSpeed,
       surface: surfaceAt(this.pos.x, this.pos.z),
     };
   }
@@ -78,7 +90,7 @@ export class Player {
     const dx = x - this.pos.x;
     const dz = z - this.pos.z;
     this.yaw = Math.atan2(-dx, -dz);
-    this.pitch = THREE.MathUtils.clamp(Math.atan2(y - this.eyeHeight, Math.hypot(dx, dz)), -MAX_PITCH, MAX_PITCH);
+    this.pitch = THREE.MathUtils.clamp(Math.atan2(y - this.eyeHeight - this.height, Math.hypot(dx, dz)), -MAX_PITCH, MAX_PITCH);
     this.applyToCamera();
   }
 
@@ -91,15 +103,31 @@ export class Player {
       forward: (down('KeyW', 'ArrowUp') ? 1 : 0) - (down('KeyS', 'ArrowDown') ? 1 : 0),
       strafe: (down('KeyD', 'ArrowRight') ? 1 : 0) - (down('KeyA', 'ArrowLeft') ? 1 : 0),
       run: down('ShiftLeft', 'ShiftRight'),
+      jump: down('Space'),
       lookYaw: look.yaw,
       lookPitch: look.pitch,
     });
   }
 
-  /** Advance the simulation. cmd: { forward, strafe, run, lookYaw, lookPitch } (forward/strafe in -1..1, look in radians). */
+  /** Advance the simulation. cmd: { forward, strafe, run, jump, lookYaw, lookPitch } (forward/strafe in -1..1, look in radians). */
   step(dt, cmd) {
     this.yaw += cmd.lookYaw ?? 0;
     this.pitch = THREE.MathUtils.clamp(this.pitch + (cmd.lookPitch ?? 0), -MAX_PITCH, MAX_PITCH);
+
+    const jump = !!cmd.jump;
+    if (jump && !this.jumpHeld && this.grounded) {
+      this.verticalSpeed = JUMP_SPEED;
+      this.grounded = false;
+    }
+    this.jumpHeld = jump;
+    if (!this.grounded) {
+      this.height += this.verticalSpeed * dt - 0.5 * GRAVITY * dt * dt;
+      this.verticalSpeed -= GRAVITY * dt;
+      if (this.height <= 0) {
+        this.height = this.verticalSpeed = 0;
+        this.grounded = true;
+      }
+    }
 
     const fx = -Math.sin(this.yaw);
     const fz = -Math.cos(this.yaw);
@@ -133,9 +161,9 @@ export class Player {
     this.runBlend += ((running && this.speed > WALK_SPEED * 0.8 ? 1 : 0) - this.runBlend) * approach(6, dt);
     const mode = this.#bobMode();
     const before = Math.floor(this.phase / TWO_PI);
-    this.phase += (dist / mode.stride) * TWO_PI;
-    this.bobGain += (Math.min(1, this.speed / WALK_SPEED) - this.bobGain) * approach(10, dt);
-    if (Math.floor(this.phase / TWO_PI) !== before && this.speed > 0.6) {
+    if (this.grounded) this.phase += (dist / mode.stride) * TWO_PI;
+    this.bobGain += ((this.grounded ? Math.min(1, this.speed / WALK_SPEED) : 0) - this.bobGain) * approach(10, dt);
+    if (this.grounded && Math.floor(this.phase / TWO_PI) !== before && this.speed > 0.6) {
       this.onFootstep?.({ surface: surfaceAt(this.pos.x, this.pos.z), running: this.runBlend > 0.5, weight: this.weight });
     }
   }
@@ -161,7 +189,7 @@ export class Player {
     const cam = this.camera;
     cam.position.set(
       this.pos.x + Math.cos(this.yaw) * lateral,
-      this.eyeHeight - 0.5 * m.lift * g * Math.cos(this.phase),
+      this.eyeHeight + this.height - 0.5 * m.lift * g * Math.cos(this.phase),
       this.pos.z - Math.sin(this.yaw) * lateral,
     );
     cam.rotation.set(this.pitch, this.yaw, m.roll * g * half, 'YXZ');

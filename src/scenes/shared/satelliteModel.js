@@ -43,7 +43,13 @@ export function buildSatelliteModel(assembly, { deployed = true } = {}) {
   }
   if (wings.length) for (const mount of solar.mounts) mount.node.visible = false;
 
-  return { root, wings, lens: anchorAtTop(root, parts.get(assembly.instrument)), antenna: anchorAtTop(root, parts.get(assembly.antenna)) };
+  const antennaPart = parts.get(assembly.antenna);
+  const signal = new THREE.Object3D();
+  const node = antennaPart.root.userData.nodes.main;
+  node.updateWorldMatrix(true,false);
+  signal.position.copy(root.worldToLocal(node.localToWorld(new THREE.Vector3(0,layout.PART_SIZES[antennaPart.id][1],0))));
+  root.add(signal);
+  return { root, wings, lens: anchorAtTop(root, parts.get(assembly.instrument)), antenna: signal };
 }
 
 /** Empty marker at the top centre of a part's bounding box, in model space. */

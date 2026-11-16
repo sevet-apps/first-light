@@ -207,7 +207,7 @@ export async function runSimTests() {
   expect('incompatible', 'MB-40 + X-Band is a blocker with a reason', hasCheck('incompatible', 'incompatible_antenna', 'blocker')
     && /SB-90/.test(detailOf('incompatible', 'incompatible_antenna')), detailOf('incompatible', 'incompatible_antenna'));
   expect('incompatible', 'cannot integrate', !ready('incompatible').canIntegrate);
-  expect('empty hangar', 'five missing-part blockers', ready('empty hangar').checks.filter((c) => c.id.startsWith('missing_')).length === 5);
+  expect('empty hangar', 'one missing-part blocker per assembly slot', ready('empty hangar').checks.filter((c) => c.id.startsWith('missing_')).length === CATEGORIES.length);
 
   // hangar ghost preview
   const none = compatibilityFor('inst_wfc', {});
@@ -227,7 +227,7 @@ export async function runSimTests() {
 
   // catalog
   expect('catalog', 'ids as in the design', ['bus_micro', 'bus_small', 'inst_wfc', 'inst_hri', 'sol_body', 'sol_2wing', 'sol_4panel', 'bat_120', 'bat_400', 'ant_uhf', 'ant_sband', 'ant_xband']
-    .every((id) => catalog.byId[id]) && catalog.parts.length === 12);
+    .every((id) => catalog.byId[id]) && catalog.parts.length === 14);
   expect('catalog', 'every part has info lines and a description', catalog.parts.every((p) => infoLines(p).length >= 3 && p.description.length > 20 && CATEGORIES.includes(p.category)));
 
   // schedule

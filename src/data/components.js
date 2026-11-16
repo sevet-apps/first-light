@@ -1,7 +1,7 @@
 // Component catalog for the FIRST LIGHT satellite. Pure data plus UI info-card helpers.
 import { fmt, fmtMusd } from './format.js';
 
-export const CATEGORIES = ['bus', 'instrument', 'solar', 'battery', 'antenna'];
+export const CATEGORIES = ['bus', 'avionics', 'attitude', 'instrument', 'solar', 'battery', 'antenna'];
 
 export const CATEGORY_LABELS = {
   bus: 'Bus',
@@ -9,12 +9,26 @@ export const CATEGORY_LABELS = {
   solar: 'Solar array',
   battery: 'Battery',
   antenna: 'Antenna',
+  avionics: 'Flight computer',
+  attitude: 'Attitude control',
 };
 
 const PARTS = [
   {
+    id: 'obc_1', category: 'avionics', name: 'OBC-1 Flight Computer', shortName: 'OBC-1',
+    mass: 2, cost: 0.4,
+    description: 'Radiation-tolerant avionics that schedules the camera, stores imagery and commands every subsystem.',
+    stats: { channels: 8, function: 'Command and data handling', note: 'Memory and power are included in the bus ratings.' },
+  },
+  {
+    id: 'adcs_1', category: 'attitude', name: 'ADCS-1 Orientation Module', shortName: 'ADCS-1',
+    mass: 4, cost: 0.6,
+    description: 'A star tracker and reaction-wheel assembly that turns the satellite between the Sun, Earth and ground stations.',
+    stats: { axes: 3, function: 'Pointing and stabilisation', note: 'Steers the three flight modes; power is included in the bus ratings.' },
+  },
+  {
     id: 'bus_micro', category: 'bus', name: 'MB-40 Microsat Bus', shortName: 'MB-40',
-    mass: 40, cost: 5,
+    mass: 34, cost: 4,
     description: 'A compact, thrifty frame that carries a small camera and not much else.',
     stats: {
       baseLoadW: 30, storageMB: 2000, maxInstrumentKg: 12,
@@ -23,7 +37,7 @@ const PARTS = [
   },
   {
     id: 'bus_small', category: 'bus', name: 'SB-90 Smallsat Bus', shortName: 'SB-90',
-    mass: 90, cost: 11,
+    mass: 84, cost: 10,
     description: 'A sturdy, roomy backbone with big on-board memory that welcomes every payload.',
     stats: {
       baseLoadW: 65, storageMB: 8000, maxInstrumentKg: 40,
@@ -117,6 +131,11 @@ export function infoLines(part) {
   const needs = (ids) => `needs ${ids.map((i) => catalog.byId[i].shortName).join(' or ')}`;
 
   switch (part.category) {
+    case 'avionics':
+    case 'attitude':
+      add('Function', s.function, 'good');
+      add('Integration', s.note);
+      break;
     case 'bus':
       add('Base power draw', `${s.baseLoadW} W, always on`, s.baseLoadW > 20 ? 'warn' : 'good');
       add('On-board memory', `${fmt(s.storageMB)} MB`, s.storageMB >= 8000 ? 'good' : 'warn');

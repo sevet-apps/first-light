@@ -33,6 +33,15 @@ const audio = new AudioManager(settings, { debug: state.params.debug });
 const ui = new UI(document.getElementById('ui'), document.getElementById('loading'), audio);
 const renderer = new Renderer(document.getElementById('stage'), settings.quality);
 const input = new Input(renderer.canvas, { settings, isSuppressed: () => ui.isModalOpen() });
+let mouseFallbackExplained = false;
+input.onLockError = () => {
+  if (mouseFallbackExplained) return;
+  mouseFallbackExplained = true;
+  ui.toast('Mouse look enabled', {
+    detail: 'Esc releases the cursor. Open in a desktop browser for mouse capture without window edges.',
+    ms: 6000,
+  });
+};
 const assets = new Assets();
 const ctx = { renderer, input, audio, assets, ui, settings, state };
 const scenes = new SceneManager(ctx);

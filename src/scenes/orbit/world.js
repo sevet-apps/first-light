@@ -6,13 +6,13 @@ import { createEarth } from '../shared/earth.js';
 import { buildSatelliteModel } from '../shared/satelliteModel.js';
 import { createStarfield } from '../shared/starfield.js';
 import { createDownlink, createImagingBeam } from './effects.js';
-import { EARTH_RADIUS, crossTrackOf, groundPoint, orbitGeometry, phaseAt, sunDirection } from './geometry.js';
+import { EARTH_RADIUS, orbitGeometry, phaseAt, sunDirection } from './geometry.js';
 import { createMarkers } from './markers.js';
 
-const SUN_INTENSITY = 2.3;
+const SUN_INTENSITY = 1.8;
 const EARTHSHINE_INTENSITY = 0.5;
-const FILL_SUNLIT = 0.7; // cold light from above and behind; it comes up in eclipse so the satellite stays readable
-const FILL_ECLIPSE = 1.0;
+const FILL_SUNLIT = 0.3;
+const FILL_ECLIPSE = 0.16;
 const LIGHT_FADE_PER_SECOND = 2.2;
 const WING_FOLLOW_PER_SECOND = 2.5;
 const CLOCK_FOLLOW_PER_SECOND = 14;
@@ -48,11 +48,15 @@ export function createOrbitWorld({ assembly, mission, schedule, labelLayer }) {
   const sun = new THREE.DirectionalLight(0xfff1dc, SUN_INTENSITY);
   const earthshine = new THREE.HemisphereLight(0x5b7fb8, 0x080c14, EARTHSHINE_INTENSITY);
   const fill = new THREE.DirectionalLight(0x7f9ccc, FILL_SUNLIT);
+  for (const light of [sun, earthshine, fill]) light.layers.set(1);
   fill.position.set(0.3, 0.7, 1);
   scene.add(sun, sun.target, earthshine, fill);
 
   const stars = createStarfield({ radius: 4200, size: 1.7, count: 2200, seed: 11 });
   stars.material.depthTest = false;
+  stars.material.transparent = true;
+  stars.material.opacity = 0.52;
+  stars.material.size = 1.25;
   stars.renderOrder = -10;
   const glare = sunSprite();
   scene.add(stars, glare);
@@ -61,8 +65,14 @@ export function createOrbitWorld({ assembly, mission, schedule, labelLayer }) {
   earth.pivot.position.copy(geo.earthCentre);
   earth.rim.position.copy(geo.earthCentre);
   scene.add(earth.pivot, earth.rim);
+  // The Earth remains illuminated on its day side even when the satellite is in eclipse.
+  const earthSun = new THREE.DirectionalLight(0xfff4e6, 2.8);
+  earthSun.name = 'earth-sun';
+  earthSun.target.position.copy(geo.earthCentre);
+  scene.add(earthSun, earthSun.target, new THREE.AmbientLight(0x14243d, 0.09));
 
   const model = buildSatelliteModel(assembly, { deployed: true });
+  model.root.traverse((o) => o.layers.set(1));
   const rig = new THREE.Group(); // instrument end points at the Earth: flip the model upside down
   rig.rotation.z = Math.PI;
   rig.add(model.root);
@@ -78,6 +88,11 @@ export function createOrbitWorld({ assembly, mission, schedule, labelLayer }) {
   const from = new THREE.Vector3();
   const to = new THREE.Vector3();
   const inverseRig = new THREE.Quaternion();
+  const restRig = rig.quaternion.clone();
+  const desiredRig = new THREE.Quaternion();
+  const aim = new THREE.Vector3();
+  const instrumentAxis = new THREE.Vector3(0,1,0);
+  const antennaAxis = new THREE.Vector3(0,0,1);
   const solarOffset = Math.acos(mission.ops.pointingSolarFraction);
   const view = { minutes: 0, light: 1, wing: 0 };
 
@@ -87,6 +102,13 @@ export function createOrbitWorld({ assembly, mission, schedule, labelLayer }) {
     satellite: model,
     beam,
     link,
+    sunDirection: sunDir,
+    async prewarmEffects(renderer, camera) {
+      const objects = [...beam.objects,...link.objects];
+      for (const object of objects) object.visible = true;
+      try { await renderer.compileAsync(scene,camera); }
+      finally { for (const object of objects) object.visible = false; }
+    },
 
     /** Put the world at simulation time `minutes` and in the satellite's current mode. */
     update(state, dt, seconds, camera) {
@@ -98,13 +120,22 @@ export function createOrbitWorld({ assembly, mission, schedule, labelLayer }) {
       earth.pivot.rotation.x = phaseAt(geo, minutes);
       sunDirection(geo, minutes, sunDir);
       sun.position.copy(sunDir).multiplyScalar(500);
+      earthSun.position.copy(geo.earthCentre).addScaledVector(sunDir, 5000);
       earth.setSun(sunDir);
+      earth.update(dt);
       view.light += ((state.sunlit ? 1 : 0) - view.light) * k(LIGHT_FADE_PER_SECOND);
       sun.intensity = SUN_INTENSITY * view.light;
       fill.intensity = FILL_SUNLIT + (FILL_ECLIPSE - FILL_SUNLIT) * (1 - view.light);
 
       stars.position.copy(camera.position);
       glare.position.copy(camera.position).addScaledVector(sunDir, SUN_DISTANCE);
+
+      const target = state.mode === 'IMAGE' ? state.currentTarget : state.mode === 'DOWNLINK' ? state.currentPass : null;
+      if (target) {
+        markers.pinOf(target.id, aim);
+        desiredRig.setFromUnitVectors(state.mode === 'IMAGE' ? instrumentAxis : antennaAxis, aim.normalize());
+      } else desiredRig.copy(restRig);
+      rig.quaternion.slerp(desiredRig, k(2.8));
 
       // Wings: face the Sun in SUN-POINT (and safe mode), tilt away while imaging or downlinking.
       inverseRig.copy(rig.quaternion).invert();
@@ -121,7 +152,7 @@ export function createOrbitWorld({ assembly, mission, schedule, labelLayer }) {
 
       if (state.mode === 'IMAGE' && state.currentTarget) {
         model.lens.getWorldPosition(from);
-        groundPoint(0, crossTrackOf(state.currentTarget), EARTH_RADIUS + 1.2, to).add(geo.earthCentre);
+        markers.pinOf(state.currentTarget.id, to);
         beam.show(from, to, geo.earthCentre, seconds);
       } else beam.hide();
 

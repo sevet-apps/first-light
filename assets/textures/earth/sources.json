@@ -1,0 +1,37 @@
+[
+  {
+    "file": "day.jpg",
+    "source": "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_day_4096.jpg",
+    "source_size_bytes": 473093
+  },
+  {
+    "file": "night.jpg",
+    "source": "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_night_4096.jpg",
+    "source_size_bytes": 267061
+  },
+  {
+    "file": "normal.jpg",
+    "source": "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_normal_2048.jpg",
+    "source_size_bytes": 336774
+  },
+  {
+    "file": "specular.jpg",
+    "source": "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_specular_2048.jpg",
+    "source_size_bytes": 223421
+  },
+  {
+    "file": "surface-packed.jpg",
+    "source": "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_bump_roughness_clouds_4096.jpg",
+    "source_size_bytes": 1508389
+  },
+  {
+    "file": "clouds.png",
+    "source": "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_bump_roughness_clouds_4096.jpg",
+    "derived_channel": "B"
+  },
+  {
+    "file": "height.jpg",
+    "source": "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_bump_roughness_clouds_4096.jpg",
+    "derived_channel": "R"
+  }
+]

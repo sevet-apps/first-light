@@ -144,6 +144,46 @@ function focusChecks(hangar, layout) {
   return rows;
 }
 
+function jumpChecks({ player, collision }, layout) {
+  const rows = [];
+  for (const dt of [1 / 60, 0.1]) {
+    player.teleport(layout.SPAWN.x, layout.SPAWN.z, 0, 0);
+    let apex = 0;
+    let airborneSteps = 0;
+    const handler = player.onFootstep;
+    player.onFootstep = () => { if (!player.grounded) airborneSteps++; };
+    // Holding Space must produce one jump, then leave the player on the floor.
+    for (let t = 0; t < 2 - 1e-9; t += dt) {
+      player.step(dt, { forward: 1, jump: true });
+      apex = Math.max(apex, player.height);
+    }
+    rows.push({ group: 'jump', name: `jump and land at dt ${dt.toFixed(3)}`,
+      pass: apex > 0.7 && apex <= 0.82 && player.height === 0 && player.grounded && airborneSteps === 0,
+      detail: `apex ${apex.toFixed(2)} m; grounded ${player.grounded}; airborne footsteps ${airborneSteps}` });
+    player.onFootstep = handler;
+
+    player.step(dt, { jump: false });
+    player.step(dt, { jump: true });
+    const velocity = player.verticalSpeed;
+    player.step(dt, { jump: false });
+    player.step(dt, { jump: true });
+    rows.push({ group: 'jump', name: `fresh press jumps; no double jump at dt ${dt.toFixed(3)}`,
+      pass: !player.grounded && velocity > 0 && player.verticalSpeed < velocity,
+      detail: `vertical speed ${velocity.toFixed(2)} → ${player.verticalSpeed.toFixed(2)} m/s` });
+
+    player.teleport(layout.HALL.minX + collision.radius + 0.1, -3, 90, 0);
+    let minClearance = Infinity;
+    for (let t = 0; t < 1 - 1e-9; t += dt) {
+      player.step(dt, { forward: 1, run: true, jump: true });
+      minClearance = Math.min(minClearance, collision.clearance(player.pos.x, player.pos.z).dist);
+    }
+    rows.push({ group: 'jump', name: `jump cannot pass through walls at dt ${dt.toFixed(3)}`,
+      pass: minClearance >= collision.radius - PEN_EPS && player.grounded,
+      detail: `min clearance ${minClearance.toFixed(3)} m` });
+  }
+  return rows;
+}
+
 /** Runs everything and publishes window.__hangarSelfTest = { allPass, results }. */
 export function runSelfTest(hangar, internals, layout) {
   const { player, collision } = internals;
@@ -162,7 +202,7 @@ export function runSelfTest(hangar, internals, layout) {
     row('standpoint', `${id} is free`, c.dist >= collision.radius ? [] : [`inside ${c.id}`], c.dist);
   }
 
-  for (const def of layout.COLLIDERS) {
+  for (const {def} of collision.obstacles) {
     const r = colliderRuns(env, def);
     row('collider', def.id, r.issues, r.minClearance, `(${r.runs} runs, ${r.slides} slides)`);
   }
@@ -191,7 +231,7 @@ export function runSelfTest(hangar, internals, layout) {
     row('corner', name, r.issues, r.minClearance);
   }
 
-  results.push(...focusChecks(hangar, layout));
+  results.push(...focusChecks(hangar, layout), ...jumpChecks(env, layout));
 
   player.teleport(saved.x, saved.z, saved.yawDeg, saved.pitchDeg);
   player.vel.x = saved.vel.x;

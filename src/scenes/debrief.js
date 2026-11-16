@@ -7,7 +7,7 @@ import { presets } from '../data/presets.js';
 import { createOrbitSim } from '../sim/orbit.js';
 import { policies, runPolicy } from '../sim/policies.js';
 import { debrief } from '../ui/panels.js';
-import { createEarth } from './shared/earth.js';
+import { createEarth, prepareEarth } from './shared/earth.js';
 import { createStarfield } from './shared/starfield.js';
 
 const EARTH_RADIUS = 900;
@@ -23,6 +23,7 @@ function fallbackResult(state) {
 
 export default {
   id: 'debrief',
+  preload: prepareEarth,
 
   /** params.result: the analyzeMission() result of the flight (default: state.lastResult). */
   async enter(ctx, params = {}) {

@@ -17,6 +17,7 @@ import { Player } from './player.js';
 import { Interaction } from './interaction.js';
 import { buildPlaceholderWorld } from './placeholderWorld.js';
 import { runSelfTest } from './selfTest.js';
+import { prepareDetailModels, detailModel, detailColliders } from '../shared/detailModels.js';
 
 const CONSOLE_REACHED_M = 2.6; // objective: within this distance of the console
 const HINT_MAX_SECONDS = 30; // the controls hint fades after this long, or sooner once you have moved and interacted
@@ -30,6 +31,7 @@ function buildHint() {
   chip.append(
     keyCap('WASD', { night: true }), el('span', '', 'Move'),
     keyCap('Shift', { night: true }), el('span', '', 'Run'),
+    keyCap('Space', { night: true }), el('span', '', 'Jump'),
     keyCap('E', { night: true }), el('span', '', 'Interact'),
     keyCap('Esc', { night: true }), el('span', '', 'Menu'),
   );
@@ -37,7 +39,8 @@ function buildHint() {
 }
 
 const CONTROLS = [
-  [['WASD'], 'Move'], [['Shift'], 'Run'], [['E'], 'Interact, pick up, install'],
+  [['Click'], 'Capture mouse to look around'],
+  [['WASD'], 'Move'], [['Shift'], 'Run'], [['Space'], 'Jump'], [['E'], 'Interact, pick up, install'],
   [['Q'], 'Put back the part you carry'], [['Esc'], 'Pause menu'],
 ];
 
@@ -60,8 +63,9 @@ function centreOf(entry) {
 
 function createScene(ctx) {
   const world = buildPlaceholderWorld(layout);
+  world.scene.add(detailModel('hangar_details'));
   const camera = new THREE.PerspectiveCamera(70, 1, 0.1, 250);
-  const collision = new Collision(layout.COLLIDERS, layout.HALL, layout.PLAYER.radius);
+  const collision = new Collision([...layout.COLLIDERS,...detailColliders()], layout.HALL, layout.PLAYER.radius);
   const player = new Player(camera, collision, layout.PLAYER, { input: ctx.input, settings: ctx.settings });
 
   const peek = ctx.ui.screen('screen--peek');
@@ -77,7 +81,9 @@ function createScene(ctx) {
   const cinematic = new IntegrationCinematic({
     ctx, world, camera, player, assembly, collision, interaction, objectives, huds: [peek, top, bottom], layout,
   });
-  const s = { world, camera, collision, player, interaction, peek, top, bottom, hint, objectives, assembly, overlay, cinematic, consoleDoc: null, consoleTab: null };
+  const fans=[];
+  world.scene.traverse((o)=>{if(o.name.startsWith('vent_fan_'))fans.push(o);});
+  const s = { world, camera, collision, player, fans, interaction, peek, top, bottom, hint, objectives, assembly, overlay, cinematic, consoleDoc: null, consoleTab: null };
 
   interaction.register({
     object: world.stations.console, kind: 'station', id: 'console', label: '', verb: 'Open Mission Console',
@@ -281,6 +287,7 @@ function installDebugApi(ctx, s) {
 
 export default {
   id: 'hangar',
+  preload: prepareDetailModels,
   look: true,
 
   /** Esc opens the pause menu, except while a document or the cinematic has the screen (they use Esc themselves). */
@@ -341,6 +348,7 @@ export default {
 
   update(dt) {
     const { ctx, s } = session;
+    for(const fan of s.fans) fan.rotation.x += dt * 0.8;
     if (s.cinematic.active || s.overlay.isOpen) {
       // The world keeps its animations; the player only coasts to a stop and cannot look around.
       ctx.input.consumeLook();

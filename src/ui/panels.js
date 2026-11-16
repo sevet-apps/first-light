@@ -21,6 +21,8 @@ export function partTitle(part) {
 
 const keyStat = (part) => {
   const s = part.stats;
+  if (s.channels !== undefined) return {label:'Interfaces',value:s.channels,unit:'channels'};
+  if (s.axes !== undefined) return {label:'Stabilisation',value:s.axes,unit:'axes'};
   if (s.powerW !== undefined) return { label: part.category === 'solar' ? 'Output' : 'Power', value: s.powerW, unit: 'W' };
   if (s.baseLoadW !== undefined) return { label: 'Base load', value: s.baseLoadW, unit: 'W' };
   return { label: 'Capacity', value: s.capacityWh, unit: 'Wh' };
@@ -307,7 +309,7 @@ function bullets(items, iconName) {
   return list;
 }
 
-/** One-line summary of the flown build: the five parts, then launch mass and cost against the limits. */
+/** Flown modules, then launch mass and cost against the limits. */
 function buildStrip({ assembly, mission }) {
   const { mass, cost } = evaluateAssembly(assembly, mission).totals;
   const strip = el('section', 'debrief__build');

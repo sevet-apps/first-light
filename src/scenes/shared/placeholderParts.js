@@ -5,6 +5,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { BUS_SOCKETS, SOCKET_NAMES } from '../../data/sockets.js';
+import { detailModel } from './detailModels.js';
 
 const mesh = (geometry, material, [x, y, z], rot = [0, 0, 0]) => {
   const m = new THREE.Mesh(geometry, material);
@@ -26,6 +27,16 @@ function bus(mat, [w, h, d]) {
   g.add(box(mat.alu, w, 0.03, d, [0, h - 0.015, 0]));
   g.add(box(mat.alu, w, 0.03, d, [0, 0.015, 0]));
   g.add(box(mat.anodized, w * 0.5, h * 0.3, 0.012, [0, h * 0.55, -d / 2 + 0.016]));
+  // Frame rails, captive fasteners and harness channels remain visible from close range.
+  for (const sy of [0.04,h-0.04]) {
+    for (const sz of [-1,1]) g.add(box(mat.alu,w,0.035,0.03,[0,sy,sz*(d/2-0.02)]));
+    for (const sx of [-1,1]) g.add(box(mat.alu,0.03,0.035,d,[sx*(w/2-0.02),sy,0]));
+  }
+  for (const sx of [-1,1]) for (const sy of [0.12,h-0.12]) {
+    g.add(mesh(new THREE.CylinderGeometry(0.018,0.018,0.012,6),mat.anodized,
+      [sx*(w/2-0.04),sy,d/2+0.006],[Math.PI/2,0,0]));
+  }
+  for (const sx of [-1,1]) g.add(box(mat.anodized,0.025,h*0.65,0.018,[sx*w*0.3,h*0.52,d/2+0.012]));
   return g;
 }
 
@@ -38,6 +49,7 @@ function instrument(mat, [w, h], { fins }) {
   const barrelH = h - bodyH;
   g.add(mesh(new THREE.CylinderGeometry(w * 0.38, w * 0.42, barrelH, 28), mat.alu, [0, bodyH + barrelH / 2, 0]));
   g.add(mesh(new THREE.CylinderGeometry(w * 0.3, w * 0.3, 0.012, 28), mat.lens, [0, h + 0.002, 0]));
+  g.add(mesh(new THREE.TorusGeometry(w*0.31,0.008,8,32),mat.anodized,[0,h+0.009,0],[Math.PI/2,0,0]));
   if (fins) {
     for (let i = 0; i < 3; i++) g.add(mesh(new THREE.CylinderGeometry(w / 2 + 0.025, w / 2 + 0.025, 0.012, 28), mat.alu, [0, bodyH * (0.25 + i * 0.25), 0]));
   }
@@ -92,10 +104,20 @@ function dish(mat, [w]) {
   const bowl = new THREE.SphereGeometry(sphereR, 32, 12, 0, Math.PI * 2, Math.PI - cap, cap).translate(0, sphereR, 0);
   const antenna = new THREE.Group(); // pivots on the mast, tilted towards the viewer (-Z)
   antenna.position.set(0, 0.25, 0);
-  antenna.rotation.x = -0.55;
+  antenna.rotation.x = 0;
   antenna.add(mesh(bowl, mat.aluDouble, [0, 0, 0]));
   antenna.add(mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.24, 8), mat.anodized, [0, 0.12, 0]));
   antenna.add(cyl(mat.foil, 0.03, 0.04, [0, 0.25, 0], 12));
+  const rimY = sphereR * (1 - Math.cos(cap));
+  antenna.add(mesh(new THREE.TorusGeometry(r, 0.006, 6, 40), mat.anodized, [0, rimY, 0], [Math.PI / 2, 0, 0]));
+  for (let i = 0; i < 3; i++) {
+    const angle = i * Math.PI * 2 / 3;
+    const a = new THREE.Vector3(Math.cos(angle) * r * 0.9, rimY, Math.sin(angle) * r * 0.9);
+    const end = new THREE.Vector3(0, 0.23, 0);
+    const support = cyl(mat.anodized, 0.004, a.distanceTo(end), a.clone().add(end).multiplyScalar(0.5).toArray(), 6);
+    support.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), end.sub(a).normalize());
+    antenna.add(support);
+  }
   g.add(antenna);
   return g;
 }
@@ -153,6 +175,8 @@ const wingNodes = (size, panels) => ({
 const single = (build) => ({ main: { build, at: [0, 0, 0] } });
 
 const NODES = {
+  obc_1: single(() => detailModel('obc_1', true)),
+  adcs_1: single(() => detailModel('adcs_1', true)),
   bus_micro: single((mat, s) => bus(mat, s)),
   bus_small: single((mat, s) => bus(mat, s)),
   inst_wfc: single((mat, s) => instrument(mat, s, { fins: false })),

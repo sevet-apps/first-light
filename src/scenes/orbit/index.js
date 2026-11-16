@@ -9,10 +9,12 @@ import { OrbitClock, WARPS } from './clock.js';
 import { installOrbitDebug } from './debug.js';
 import { createOrbitHud } from './hud.js';
 import { createOrbitWorld } from './world.js';
+import { prepareDetailModels } from '../shared/detailModels.js';
+import { prepareEarth } from '../shared/earth.js';
 
 const MODE_KEYS = { Digit1: 'SUN', Digit2: 'IMAGE', Digit3: 'DOWNLINK', Numpad1: 'SUN', Numpad2: 'IMAGE', Numpad3: 'DOWNLINK' };
 const END_PAUSE_SECONDS = 2.8; // "Mission complete" stays up this long before the debrief
-const BLOOM = { strength: 0.4, radius: 0.6, threshold: 0.8 };
+const BLOOM = { strength: 0.2, radius: 0.5, threshold: 1.05 };
 
 let guidanceSeen = false; // the three-modes card is shown once per session
 let session = null;
@@ -50,12 +52,16 @@ function createSession(ctx, params) {
 
   const rig = new CameraRig(ctx.renderer.canvas);
   const s = { ctx, sim, rig, mission, started: false, logSeen: 0, lastMode: 'SUN', ending: 0, leaving: false, seconds: 0 };
+  s.exploring = false;
+  s.hudElapsed = 1;
   s.clock = new OrbitClock(sim, mission.orbit.realSecondsPerOrbit, mission.orbit.orbitMinutes);
   s.clock.warp = state.params.warp > 1 ? state.params.warp : 1;
   s.hud = createOrbitHud(ctx, {
     mission,
     onMode: (mode) => setMode(s, mode),
     onWarp: (warp) => s.clock.setWarp(warp),
+    onView: () => changeView(s),
+    onExplore: () => explore(s),
   });
   s.world = createOrbitWorld({ assembly: state.assembly, mission, schedule: sim.schedule, labelLayer: s.hud.labelLayer });
   s.clock.onWarpDrop = (event) => {
@@ -87,8 +93,19 @@ function begin(s) {
   s.started = true;
 }
 
+function changeView(s) {
+  s.rig.setView(s.rig.view === 'earth' ? 'satellite' : 'earth', s.world.sunDirection);
+  s.hud.setView(s.rig.view);
+}
+
+function explore(s) {
+  s.exploring = !s.exploring;
+  s.hud.setExploring(s.exploring);
+}
+
 export default {
   id: 'orbit',
+  preload: (ctx) => Promise.all([prepareDetailModels(ctx), prepareEarth(ctx)]),
   pausable: true,
 
   /** params.assembly: the integrated build (falls back to the current one, then to a balanced preset). */
@@ -96,12 +113,16 @@ export default {
     session = createSession(ctx, params);
     const s = session;
     ctx.renderer.setView(s.world.scene, s.rig.camera, { bloom: BLOOM });
+    await s.world.prewarmEffects(ctx.renderer.gl,s.rig.camera);
     if (guidanceSeen || !ctx.state.params.guide) begin(s);
     else {
       guidanceSeen = true;
       s.hud.showGuidance(() => begin(s));
     }
-    installOrbitDebug(s, { begin: () => begin(s), setMode: (mode) => setMode(s, mode), stepWarp: (d) => stepWarp(s, d) });
+    installOrbitDebug(s, { begin: () => begin(s), setMode: (mode) => setMode(s, mode), stepWarp: (d) => stepWarp(s, d),
+      setView: (view) => { s.rig.setView(view, s.world.sunDirection); s.hud.setView(s.rig.view); },
+      explore: (value) => { s.exploring = value; s.hud.setExploring(value); },
+    });
   },
 
   update(dt) {
@@ -109,9 +130,12 @@ export default {
     const { ctx, sim } = s;
     s.seconds += dt;
     const paused = !s.started || ctx.menus.mode !== null;
-    s.clock.paused = paused || !!s.ending;
+    s.clock.paused = paused || s.exploring || !!s.ending;
 
     if (!paused && !s.ending) {
+      if (ctx.input.pressed('KeyV')) changeView(s);
+      if (ctx.input.pressed('KeyP')) explore(s);
+      if (ctx.input.pressed('KeyH')) s.hud.toggleHud();
       for (const [code, mode] of Object.entries(MODE_KEYS)) if (ctx.input.pressed(code)) setMode(s, mode);
       if (ctx.input.pressed('BracketLeft')) stepWarp(s, -1);
       if (ctx.input.pressed('BracketRight')) stepWarp(s, 1);
@@ -125,14 +149,18 @@ export default {
     }
     s.lastMode = state.mode;
 
-    s.rig.update(dt, { x: 0, y: 0, z: 0 });
+    s.rig.update(dt, { x: 0, y: 0, z: 0 }, s.world.geo.earthCentre);
     s.world.update(state, dt, s.seconds, s.rig.camera);
     const eclipse = sim.schedule.eclipses.find((e) => state.t >= e.start && state.t < e.end);
-    s.hud.update(state, sim.upcoming(4), s.clock.effectiveWarp, {
-      note: s.ending ? 'Mission complete. Preparing the debrief.' : null,
-      eclipseEndsIn: eclipse ? eclipse.end - state.t : null,
-      focus: s.clock.focus,
-    });
+    s.hudElapsed += dt;
+    if (s.hudElapsed >= 0.1) {
+      s.hudElapsed = 0;
+      s.hud.update(state, sim.upcoming(4), s.clock.effectiveWarp, {
+        note: s.ending ? 'Mission complete. Preparing the debrief.' : s.exploring ? 'Time paused · P to resume' : null,
+        eclipseEndsIn: eclipse ? eclipse.end - state.t : null,
+        focus: s.clock.focus,
+      });
+    }
 
     if (state.done && !s.ending) finishMission(s);
     if (s.ending) {

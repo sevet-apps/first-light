@@ -121,8 +121,8 @@ const claddingTexture = () => canvasTexture((ctx, w, h) => {
   speckle(ctx, w, h, 900, 0.1);
 });
 
-const LABELS = ['BUSES', 'INSTRUMENTS', 'SOLAR ARRAYS', 'BATTERIES', 'ANTENNAS', 'MISSION CONSOLE', 'LAUNCH CONTROL', 'INTEGRATION STAND', 'ENCAPSULATION'];
-const ATLAS = { cols: 3, rows: 3, cellW: 512, cellH: 128 };
+const LABELS = ['BUSES', 'INSTRUMENTS', 'SOLAR ARRAYS', 'BATTERIES', 'ANTENNAS', 'MISSION CONSOLE', 'LAUNCH CONTROL', 'INTEGRATION STAND', 'ENCAPSULATION', 'FLIGHT SYSTEMS'];
+const ATLAS = { cols: 2, rows: 5, cellW: 1024, cellH: 256 };
 
 /** Paper-and-ink signs, one cell per label (see signUv). */
 function signAtlas() {
@@ -140,9 +140,9 @@ function signAtlas() {
       ctx.fillStyle = '#D8382C';
       ctx.fillRect(x + 6, y + 6, 14, cellH - 12);
       ctx.fillStyle = '#1B1B1B';
-      ctx.font = '600 44px Inter, "Segoe UI", sans-serif';
+      ctx.font = '600 80px Inter, "Segoe UI", sans-serif';
       ctx.textBaseline = 'middle';
-      ctx.fillText(text, x + 42, y + cellH / 2 + 2, cellW - 70);
+      ctx.fillText(text, x + 64, y + cellH / 2 + 2, cellW - 100);
     });
   }, { repeat: false, width: cellW * cols, height: cellH * rows });
 }

@@ -12,5 +12,12 @@ python tools/serve.py
 ```
 Then open http://localhost:8080.
 
+## Controls and visual update
+Click the game to capture the mouse; **Esc** releases it. **WASD** moves, **Shift** runs, **Space** jumps, **E** interacts and **Q** returns a carried part.
+
+Build seven modules: bus, flight computer, attitude control, instrument, solar array, battery and antenna. In orbit, **1/2/3** select charging, imaging and downlink. Drag to orbit the camera, scroll to zoom, **V** switches between satellite and Earth views, **P** pauses mission time while you explore and **H** hides the instruments.
+
+Verification: [`tests/sim.html`](tests/sim.html), [`tests/hangar.html`](tests/hangar.html), [`tests/assembly.html`](tests/assembly.html), [`tests/audio.html`](tests/audio.html), [`tests/visual.html`](tests/visual.html).
+
 ## Credits
 See [CREDITS.md](CREDITS.md).

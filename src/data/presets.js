@@ -1,6 +1,6 @@
 // Named satellite configurations, usable as ?assembly=<name>. Also the balancing scenarios of the test page.
 
-const make = (bus, instrument, solar, battery, antenna) => ({ bus, instrument, solar, battery, antenna });
+const make = (bus, instrument, solar, battery, antenna) => ({ bus, avionics: 'obc_1', attitude: 'adcs_1', instrument, solar, battery, antenna });
 
 export const presets = {
   overbudget: make('bus_small', 'inst_hri', 'sol_4panel', 'bat_400', 'ant_xband'), // over budget: the priciest part of every category

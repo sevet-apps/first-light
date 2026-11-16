@@ -10,11 +10,13 @@
 // - `rotation` is Euler XYZ in degrees, `scale` stretches a part to fit the bus (placeholder wings only).
 // - A mount's `offset` is the part's pose inside the socket frame (antennas stand upright on the front face).
 
-export const SOCKET_NAMES = ['instrument', 'antenna', 'battery', 'solar_px', 'solar_nx', 'body'];
+export const SOCKET_NAMES = ['instrument', 'antenna', 'battery', 'avionics', 'attitude', 'solar_px', 'solar_nx', 'body'];
 
 const busSockets = ([w, h, d], wingScale) => ({
   instrument: { position: [0, h, 0] },
-  antenna: { position: [0, h / 2, d / 2] },
+  antenna: { position: [0, h * 0.68, d / 2], rotation: [90, 0, 0] },
+  avionics: { position: [-w * 0.34, h, -d * 0.34], scale: [w < 0.8 ? 0.7 : 1, 1, w < 0.8 ? 0.7 : 1] },
+  attitude: { position: [w * 0.34, h, -d * 0.34], scale: [w < 0.8 ? 0.7 : 1, 1, w < 0.8 ? 0.7 : 1] },
   battery: { position: [0, h / 2, -d / 2], rotation: [-90, 0, 0] },
   solar_px: { position: [w / 2, h / 2, 0], rotation: [0, 0, -90], scale: wingScale },
   solar_nx: { position: [-w / 2, h / 2, 0], rotation: [0, 0, 90], scale: wingScale },
@@ -26,13 +28,15 @@ export const BUS_SOCKETS = {
   bus_small: busSockets([1.0, 1.3, 1.0], [1.9, 1.0, 1.2]),
 };
 
-const FRONT_MAST = { position: [0, 0, 0.07] };
+const FRONT_MAST = { position: [0, 0.012, 0] };
 
 /**
  * Which nodes of each part travel to which socket. A node name refers to a child of the part's root
  * (see placeholderParts.js). `variants` maps a bus id to the node used for that bus (body-mounted cells).
  */
 export const MOUNTS = {
+  obc_1: [{ node: 'main', socket: 'avionics' }],
+  adcs_1: [{ node: 'main', socket: 'attitude' }],
   bus_micro: [{ node: 'main', socket: 'bus' }],
   bus_small: [{ node: 'main', socket: 'bus' }],
   inst_wfc: [{ node: 'main', socket: 'instrument' }],
@@ -43,6 +47,6 @@ export const MOUNTS = {
   bat_120: [{ node: 'main', socket: 'battery' }],
   bat_400: [{ node: 'main', socket: 'battery' }],
   ant_uhf: [{ node: 'main', socket: 'antenna', offset: FRONT_MAST }],
-  ant_sband: [{ node: 'main', socket: 'antenna', offset: { rotation: [90, 0, 0] } }],
-  ant_xband: [{ node: 'main', socket: 'antenna', offset: { position: [0, -0.12, 0.1], rotation: [0, 180, 0] } }],
+  ant_sband: [{ node: 'main', socket: 'antenna', offset: FRONT_MAST }],
+  ant_xband: [{ node: 'main', socket: 'antenna', offset: FRONT_MAST }],
 };

@@ -75,13 +75,17 @@ function hall(b, mat, layout) {
   b.plane(mat.concrete, w, d, [0, 0, 0], [-90, 0, 0], FLOOR_TILE_M);
   b.plane(mat.ceiling, w, d, [0, H.height, 0], [90, 0, 0]);
   b.plane(mat.cladding, w, H.height, [0, mid, H.minZ], [0, 0, 0], 1);
-  b.plane(mat.cladding, w, H.height, [0, mid, H.maxZ], [0, 180, 0], 1);
+  // The high-bay door occupies a real opening rather than sitting on top of an unbroken wall.
+  for (const side of [-1, 1]) b.plane(mat.cladding, 17, H.height, [side * 21.5, mid, H.maxZ], [0,180,0], 1);
+  b.plane(mat.cladding, 26, H.height - 41, [0, (H.height + 41) / 2, H.maxZ], [0,180,0], 1);
   b.plane(mat.cladding, d, H.height, [H.minX, mid, 0], [0, 90, 0], 1);
   b.plane(mat.cladding, d, H.height, [H.maxX, mid, 0], [0, -90, 0], 1);
 
   // Girts and columns give the walls scale; columns match the collider boxes.
   for (const y of [6, 20, 35, 50, 64]) {
-    for (const z of [H.minZ + 0.15, H.maxZ - 0.15]) b.box(mat.darkSteel, [w, 0.5, 0.3], [0, y, z]);
+    b.box(mat.darkSteel, [w,0.5,0.3], [0,y,H.minZ+0.15]);
+    if (y > 41) b.box(mat.darkSteel, [w,0.5,0.3], [0,y,H.maxZ-0.15]);
+    else for (const side of [-1,1]) b.box(mat.darkSteel, [17,0.5,0.3], [side*21.5,y,H.maxZ-0.15]);
     for (const x of [H.minX + 0.15, H.maxX - 0.15]) b.box(mat.darkSteel, [0.3, 0.5, d], [x, y, 0]);
   }
   for (const side of [-1, 1]) {
@@ -129,11 +133,19 @@ function catwalks(b, mat, layout) {
 
 function southDoor(b, mat, layout) {
   const z = layout.HALL.maxZ - 0.4;
-  b.box(mat.darkSteel, [25, 40.6, 0.3], [0, 20.3, z]);
-  for (let y = 2; y < 40; y += 2) b.box(mat.steel, [24, 0.12, 0.12], [0, y, z - 0.2]);
-  for (const x of [-12.6, 12.6]) b.box(mat.steel, [0.8, 41, 0.8], [x, 20.5, z - 0.1]);
-  b.box(mat.steel, [26, 0.8, 0.8], [0, 40.8, z - 0.1]);
-  for (let x = -12; x < 12; x += 1.2) b.box(Math.round(x / 1.2) % 2 ? mat.black : mat.yellow, [1.2, 1, 0.06], [x + 0.6, 0.5, z - 0.25]);
+  b.box(mat.black, [25.2,40.5,0.16], [0,20.25,z+0.12]);
+  for (let i=0;i<20;i++) {
+    const y = 1 + i*2;
+    b.box(mat.darkSteel,[24.8,1.96,0.18],[0,y,z-0.05]);
+    b.box(mat.steel,[24.3,0.035,0.03],[0,y+0.89,z-0.155]);
+  }
+  for (const x of [-12.75,12.75]) {
+    b.box(mat.steel,[0.32,40.5,0.5],[x,20.25,z-0.1]);
+    b.box(mat.black,[0.08,40.3,0.12],[x,20.15,z-0.38]);
+  }
+  b.box(mat.steel,[26,0.6,0.6],[0,40.65,z-0.1]);
+  b.box(mat.darkSteel,[26,0.28,0.85],[0,41.09,z-0.1]);
+  for (let i=0;i<20;i++) b.box(i%2 ? mat.black:mat.yellow,[1.24,0.45,0.035],[-11.78+i*1.24,0.35,z-0.16]);
   // Person door beside it, with an exit light.
   b.box(mat.steel, [1.3, 2.4, 0.2], [17, 1.2, layout.HALL.maxZ - 0.1]);
   b.box(mat.cabinet, [1.0, 2.1, 0.12], [17, 1.05, layout.HALL.maxZ - 0.2]);
@@ -250,9 +262,12 @@ function rocket(b, mat, R, layout) {
   b.cylinder(mat.interstage, r + 0.25, r + 0.02, 1.2, [0, y0 + 0.6, 0], null, 40); // engine skirt
   const stack = [[y0 + 1.2, 29, mat.white], [29, 31.5, mat.interstage], [31.5, 37, mat.white], [37, 47, mat.white]];
   for (const [ya, yb, m] of stack) b.cylinder(m, r, r, yb - ya, [0, (ya + yb) / 2, 0], null, 40);
-  for (let y = 6; y < 28; y += 4) b.cylinder(mat.steel, r + 0.012, r + 0.012, 0.05, [0, y, 0], null, 40);
-  b.cylinder(mat.signalRed, r + 0.015, r + 0.015, 1.2, [0, 20.5, 0], null, 40);
-  b.cylinder(mat.black, r + 0.015, r + 0.015, 4, [0, 8, 0], null, 40);
+  // Narrow open bands leave the tank skin intact and avoid coplanar end caps.
+  const band = (material, radius, height, y, x=0, segments=48) =>
+    b.add(material,new THREE.CylinderGeometry(radius,radius,height,segments,1,true),[x,y,0]);
+  for (let y=6;y<28;y+=4) band(mat.steel,r+0.025,0.045,y);
+  band(mat.signalRed,r+0.026,1.2,20.5);
+  band(mat.black,r+0.026,4,8);
   // The nose is the payload fairing, which the crane brings later: upper stage tapers to the payload deck.
   const deckR = layout.PAYLOAD.radius + 0.05;
   b.cylinder(mat.white, deckR, r, R.payloadY - 0.05 - 47, [0, (47 + R.payloadY - 0.05) / 2, 0], null, 40);
@@ -263,8 +278,9 @@ function rocket(b, mat, R, layout) {
     b.cylinder(mat.interstage, 1.05, 0.92, 0.9, [x, y0 + 0.45, 0], null, 28);
     b.cylinder(mat.white, 0.9, 0.9, 20, [x, y0 + 10.9, 0], null, 28);
     b.cylinder(mat.white, 0.05, 0.9, 4, [x, y0 + 22.9, 0], null, 28);
-    b.cylinder(mat.signalRed, 0.915, 0.915, 0.7, [x, 17, 0], null, 28);
-    for (const y of [8, 16]) b.box(mat.steel, [R.boosterX - r - 0.9 + 0.3, 0.2, 0.3], [x * 0.65, y, 0]);
+    band(mat.signalRed,0.925,0.7,17,x,32);
+    const inner = R.boosterX - 0.9;
+    for (const y of [8,16]) b.box(mat.steel,[inner-r+0.12,0.18,0.26],[sx*(r+inner)/2,y,0]);
   }
   b.pop();
 }
@@ -328,7 +344,11 @@ function sign(b, mat, label, w, h, pos, rot) {
 /** A sign on a thin mast, facing +Z rotated by yawDeg. */
 function signPost(b, mat, label, [x, z], yawDeg, y, w) {
   b.push(x, 0, z, yawDeg);
-  b.cylinder(mat.darkSteel, 0.035, 0.035, y, [0, y / 2, 0]);
+  const panelHeight = w * 0.25 + 0.1;
+  const mastHeight = y - panelHeight / 2;
+  b.cylinder(mat.darkSteel, 0.035, 0.035, mastHeight, [0, mastHeight / 2, -0.09]);
+  b.box(mat.darkSteel, [0.1,0.16,0.1], [0,mastHeight+0.04,-0.07]);
+  b.box(mat.darkSteel, [0.42, 0.035, 0.34], [0, 0.0175, -0.09]);
   b.box(mat.black, [w + 0.1, w * 0.25 + 0.1, 0.04], [0, y, -0.03]);
   sign(b, mat, label, w, w * 0.25, [0, y, 0], [0, 0, 0]);
   b.pop();
@@ -353,12 +373,13 @@ function props(b, mat, layout) {
       b.box(mat.steel, [p.w, 0.04, p.d], [0, 0.15, 0]);
       for (const sx of [-1, 1]) {
         for (const sz of [-1, 1]) {
-          b.box(mat.steel, [0.04, 0.5, 0.04], [sx * (p.w / 2 - 0.03), 0.4, sz * (p.d / 2 - 0.03)]);
+          const top = sz > 0 ? 0.9 : 0.65;
+          b.box(mat.steel, [0.04,top-0.13,0.04], [sx * (p.w / 2 - 0.03), (top+0.13)/2, sz * (p.d / 2 - 0.03)]);
           b.cylinder(mat.rubber, 0.09, 0.09, 0.05, [sx * (p.w / 2 - 0.03), 0.09, sz * (p.d / 2 - 0.1)], [0, 0, 90], 12);
         }
       }
-      b.box(mat.yellow, [p.w, 0.04, 0.04], [0, 0.9, p.d / 2 - 0.03]);
-      b.box(mat.cardboard, [p.w * 0.8, 0.3, p.d * 0.4], [0, 0.58, -p.d * 0.15]);
+      b.box(mat.yellow, [p.w, 0.05, 0.05], [0, 0.9, p.d / 2 - 0.03]);
+      b.box(mat.cardboard, [p.w * 0.8, 0.3, p.d * 0.4], [0, 0.575, -p.d * 0.15]);
     },
     chest: (p) => {
       b.box(mat.red, [p.w, p.h, p.d], [0, p.h / 2, 0]);

@@ -6,7 +6,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
 const BLOOM_DEFAULTS = { strength: 0.3, radius: 0.5, threshold: 0.9 };
 const QUALITY = {
-  high: { maxPixelRatio: 2, shadows: true, bloom: true, msaa: 4 },
+  high: { maxPixelRatio: 1.5, shadows: true, bloom: true, msaa: 2 },
   low: { maxPixelRatio: 1, shadows: false, bloom: false, msaa: 0 },
 };
 
@@ -89,6 +89,13 @@ export class Renderer {
     if (!this.scene) return;
     this.gl.info.reset();
     this.composer.render();
+  }
+
+  /** Compile and upload behind the loading screen rather than on the first playable frame. */
+  async warmUp() {
+    if (!this.scene) return;
+    await this.gl.compileAsync(this.scene, this.camera);
+    this.render();
   }
 
   #fitCamera() {

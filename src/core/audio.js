@@ -121,9 +121,18 @@ export class AudioManager {
     if (!this.ctx || !camera) return;
     const e = camera.matrixWorld.elements;
     const l = this.ctx.listener;
-    l.positionX.value = e[12]; l.positionY.value = e[13]; l.positionZ.value = e[14];
-    l.forwardX.value = -e[8]; l.forwardY.value = -e[9]; l.forwardZ.value = -e[10];
-    l.upX.value = e[4]; l.upY.value = e[5]; l.upZ.value = e[6];
+    // Firefox exposes the legacy setters instead of the AudioParam properties.
+    if (l.positionX && l.positionY && l.positionZ) {
+      l.positionX.value = e[12]; l.positionY.value = e[13]; l.positionZ.value = e[14];
+    } else {
+      l.setPosition?.(e[12], e[13], e[14]);
+    }
+    if (l.forwardX && l.forwardY && l.forwardZ && l.upX && l.upY && l.upZ) {
+      l.forwardX.value = -e[8]; l.forwardY.value = -e[9]; l.forwardZ.value = -e[10];
+      l.upX.value = e[4]; l.upY.value = e[5]; l.upZ.value = e[6];
+    } else {
+      l.setOrientation?.(-e[8], -e[9], -e[10], e[4], e[5], e[6]);
+    }
   }
 
   #buildBuses() {

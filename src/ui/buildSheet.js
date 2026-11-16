@@ -9,7 +9,7 @@ import { CATEGORIES, CATEGORY_LABELS, getPart } from '../data/components.js';
 import { fmt, fmtMusd } from '../data/format.js';
 import { evaluateAssembly } from '../sim/assembly.js';
 
-const SLOT_ICONS = { bus: 'satellite', instrument: 'camera', solar: 'sun', battery: 'battery', antenna: 'signal' };
+const SLOT_ICONS = { bus: 'satellite', avionics: 'memory', attitude: 'satellite', instrument: 'camera', solar: 'sun', battery: 'battery', antenna: 'signal' };
 const NBSP = ' ';
 const round1 = (v) => Math.round(v * 10) / 10;
 

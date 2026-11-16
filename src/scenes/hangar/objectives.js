@@ -1,8 +1,8 @@
-// The hangar objective tracker. Stages: walk to the console -> assemble the satellite (five slots) -> run the
+// The hangar objective tracker. Stages: walk to the console -> assemble the satellite -> run the
 // readiness check -> integrate the payload -> begin the countdown. A redesign visit starts at 'redesign'.
-import { CATEGORIES } from '../../data/components.js';
+import { CATEGORIES, CATEGORY_LABELS } from '../../data/components.js';
 
-const SLOT_TEXT = { bus: 'Bus', instrument: 'Instrument', solar: 'Solar', battery: 'Battery', antenna: 'Antenna' };
+const SLOT_TEXT = CATEGORY_LABELS;
 const TICK_PAUSE_S = 1.1; // how long a finished step stays visible before the next one replaces it
 
 export class HangarObjectives {

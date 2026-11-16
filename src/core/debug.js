@@ -19,6 +19,7 @@ export function installDebug({ enabled, app }) {
     sim: { evaluateAssembly, createOrbitSim, catalog, mission, presets, policies },
     goto: (id, params) => scenes.goto(id, params),
     get scene() { return scenes.current; },
+    get transitioning() { return scenes.busy; },
   };
   if (!enabled) return () => {};
 
