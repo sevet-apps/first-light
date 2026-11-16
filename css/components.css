@@ -424,7 +424,7 @@ html, body {
 .meter[data-state='over'] .meter__tick-label { color: var(--signal); }
 .meter--night .meter__bar { background: rgba(241, 236, 226, 0.14); box-shadow: none; }
 .meter--night .meter__fill { background: var(--paper); }
-.meter--night[data-state='near'] .meter__fill { background: var(--signal); }
+.meter--night[data-state='near'] .meter__fill { background: var(--amber); }
 .meter--night .meter__tick { background: rgba(241, 236, 226, 0.8); }
 .meter--night .meter__tick-label { color: rgba(241, 236, 226, 0.65); }
 
