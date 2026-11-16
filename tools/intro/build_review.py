@@ -15,12 +15,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))  # -I drops the script 
 from common import REVIEW, ROOT, SR, load_edl, read_audio, run
 
 V = ROOT / "assets" / "video" / "intro.mp4"
-A = {s: ROOT / "assets" / "audio" / f"intro_{s}.mp3" for s in ("voice", "music", "sfx")}
+A = {s: ROOT / "assets" / "audio" / f"intro_{s}.mp3" for s in ("voice", "music") if (ROOT / "assets" / "audio" / f"intro_{s}.mp3").exists()}
 
 
 def preview():
     run(["ffmpeg", "-v", "error", "-y", "-i", V, *sum((["-i", a] for a in A.values()), []),
-         "-filter_complex", "[1:a][2:a][3:a]amix=inputs=3:normalize=0:duration=longest[a]",
+         "-filter_complex", f"{''.join(f'[{i + 1}:a]' for i in range(len(A)))}amix=inputs={len(A)}:normalize=0:duration=longest[a]",
          "-map", "0:v", "-map", "[a]", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", REVIEW / "intro_preview.mp4"])
     r = subprocess.run(["ffmpeg", "-hide_banner", "-i", REVIEW / "intro_preview.mp4", "-af", "ebur128=peak=true",
                         "-f", "null", "-"], capture_output=True, text=True)

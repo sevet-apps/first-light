@@ -8,7 +8,7 @@ Cut by `tools/intro/build_video.py` from `tools/intro/edl.json` (source time ran
 - **ESA video 2402_023_BR_084** (`2402_023_BR_084.mp4`) - onboard launch-vehicle cameras, (c) ESA. Used: 190.0-192.7 s (Earth fills the frame), 945.0-947.6 s (orbit view), 785.0-788.0 s (Earth limb, title fade).
 - **Artemis I Orion / ICPS separation** (`jsc2022m000272_Artemis_I_Orion_ICPS_Separation_Hi-Res~orig.mp4`) - NASA / Johnson Space Center. Used: 44.0-47.8 s (solar array), 31.0-33.4 s (stage separation).
 
-The NASA clips' own audio tracks are silent, so all launch sound in the intro is synthesised (`tools/intro/build_sfx.py`).
+The NASA clips' own audio tracks are silent; the intro uses the narration only (no sound effects).
 
 NASA still and moving imagery is generally not subject to copyright in the United States; it is used here for educational purposes without implying NASA endorsement. ESA material is used under ESA's terms for non-commercial/educational use with attribution. NASA and ESA logos are not used as game branding.
 
@@ -22,4 +22,3 @@ NASA still and moving imagery is generally not subject to copyright in the Unite
 - [three.js](https://threejs.org) r170 — MIT License (`vendor/three/LICENSE`).
 - All 3D models were created with **Blender** 5.2 via the scripts in `blender/`.
 - Narration synthesized locally with **Kokoro TTS** (Apache-2.0) from an original script (`docs/INTRO_SCRIPT.md`).
-- Intro music and sound design are original, synthesized with numpy/scipy (`tools/intro/build_music.py`, `build_sfx.py`).

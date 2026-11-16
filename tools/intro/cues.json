@@ -1,13 +1,11 @@
 {
   "duration": 34.0,
-  "audioEnd": 38.0,
+  "audioEnd": 36.0,
   "title_card_start": 31.4,
   "fps": 30,
   "video": "assets/video/intro.mp4",
-  "audio": {
-    "voice": "assets/audio/intro_voice.mp3",
-    "music": "assets/audio/intro_music.mp3",
-    "sfx": "assets/audio/intro_sfx.mp3"
+  "stems": {
+    "voice": "assets/audio/intro_voice.mp3"
   },
   "subtitles": "assets/subtitles/intro.en.vtt",
   "voice_source": "kokoro:af_nicole@0.9",
