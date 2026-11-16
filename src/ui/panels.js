@@ -6,7 +6,7 @@ import { stagger } from './motion.js';
 import {
   button, checklist, displayTitle, documentCard, meter, microLabel, segmented, specList, stars, statBlock,
 } from './components.js';
-import { CATEGORIES, CATEGORY_LABELS, infoLines } from '../data/components.js';
+import { CATEGORIES, CATEGORY_LABELS, getPart, infoLines } from '../data/components.js';
 import { compatibilityFor } from '../sim/assembly.js';
 import { fmt, fmtMusd } from '../data/format.js';
 
@@ -70,11 +70,11 @@ export function partInfoCard(part, { assembly = null, installed = false, onInsta
   return card;
 }
 
-/** Mission brief document: story, requirements and the three hard numbers. */
-export function missionBrief(mission, { onClose = null, onContinue = null } = {}) {
-  const card = documentCard({
-    code: 'FL-DOC-001', index: '01 / 05', label: `Mission ${mission.satellite}`, title: 'Mission Brief', marks: true, className: 'brief',
-  });
+/**
+ * The two columns of the mission brief: the story on the left, the three hard numbers and the requirements on the
+ * right. `stars` turns the requirements into the objectives list, one drawn star each, with the rule for stars.
+ */
+export function briefBody(mission, { stars: starsMode = false } = {}) {
   const cols = el('div', 'brief__cols');
 
   const story = el('div', 'brief__story');
@@ -89,61 +89,119 @@ export function missionBrief(mission, { onClose = null, onContinue = null } = {}
     statBlock({ label: 'Capacity', value: mission.capacityKg, unit: 'kg', large: true, format: (v) => fmt(v) }),
     statBlock({ label: 'Goal', value: mission.goalMB, unit: 'MB', large: true, format: (v) => fmt(v) }),
   );
-  const reqs = el('ol', 'requirements');
+  const reqs = el('ol', `requirements${starsMode ? ' requirements--stars' : ''}`);
   mission.objectives.forEach((o, i) => {
     const li = el('li', 'requirements__item');
-    li.append(el('span', 'requirements__no', pad2(i + 1)));
+    li.append(starsMode ? icon('star', { className: 'requirements__star' }) : el('span', 'requirements__no', pad2(i + 1)));
     const text = el('div', '');
     text.append(el('b', 'requirements__title', o.title), el('p', '', o.text));
     li.append(text);
     reqs.append(li);
   });
-  side.append(microLabel('Mission numbers', 'label--quiet'), stats, el('hr', 'rule rule--hair'), microLabel('Requirements', 'label--quiet'), reqs);
+  side.append(microLabel('Mission numbers', 'label--quiet'), stats, el('hr', 'rule rule--hair'), microLabel(starsMode ? 'Objectives and stars' : 'Requirements', 'label--quiet'), reqs);
+  if (starsMode) side.append(el('p', 'requirements__note', 'Each objective you meet earns one star. Stars only count once the first objective is met.'));
 
   cols.append(story, side);
-  card.body.append(cols);
+  return cols;
+}
+
+/** Mission brief document: story, requirements and the three hard numbers. */
+export function missionBrief(mission, { onClose = null, onContinue = null } = {}) {
+  const card = documentCard({
+    code: 'FL-DOC-001', index: '01 / 05', label: `Mission ${mission.satellite}`, title: 'Mission Brief', marks: true, className: 'brief',
+  });
+  card.body.append(briefBody(mission));
   const actions = el('div', 'btn-row doc__actions');
   actions.append(button('Close', 'ghost', onClose), button('Begin building', 'primary', onContinue, { icon: 'arrow' }));
   card.body.append(actions);
   return card;
 }
 
-/** Readiness check document for an evaluateAssembly() result. */
-export function readinessCheck(result, mission, { onBack = null, onIntegrate = null } = {}) {
-  const { totals, checks, canIntegrate } = result;
-  const blockers = checks.filter((c) => c.severity === 'blocker').length;
-  const warnings = checks.filter((c) => c.severity === 'warning').length;
-  const card = documentCard({
-    code: 'FL-DOC-003', index: '03 / 05', label: 'Pre-launch', title: 'Readiness Check', marks: true, className: 'readiness',
-  });
+const count = (n, word) => `${n} ${word}${n > 1 ? 's' : ''}`;
 
+/** The check's verdict banner: tone by the worst finding, plus the number of blockers / warnings. */
+export function verdictBanner(result, { clearedText = 'Cleared for integration', blockedText = 'Not cleared for integration' } = {}) {
+  const blockers = result.checks.filter((c) => c.severity === 'blocker').length;
+  const warnings = result.checks.filter((c) => c.severity === 'warning').length;
   const tone = blockers ? 'blocker' : warnings ? 'warning' : 'ok';
   const verdict = el('div', `verdict verdict--${tone}`);
   const badge = el('span', 'verdict__badge');
   badge.append(icon(tone === 'ok' ? 'check' : tone, { draw: true }));
   const words = el('div', 'verdict__text');
   words.append(
-    el('b', '', blockers ? 'Not cleared for integration' : 'Cleared for integration'),
+    el('b', '', blockers ? blockedText : warnings ? `${clearedText}, with warnings` : clearedText),
     el('span', '', [
-      blockers ? `${blockers} blocker${blockers > 1 ? 's' : ''}` : null,
-      warnings ? `${warnings} warning${warnings > 1 ? 's' : ''}` : null,
+      blockers ? count(blockers, 'blocker') : null,
+      warnings ? count(warnings, 'warning') : null,
       !blockers && !warnings ? 'Nothing to fix' : null,
     ].filter(Boolean).join(' · ')),
   );
   verdict.append(badge, words);
+  return verdict;
+}
 
+/** Mass and budget meters against the mission limits. */
+export function limitMeters(totals, mission) {
   const meters = el('div', 'readiness__meters');
   meters.append(
     meter({ label: 'Launch mass', value: totals.mass, limit: mission.capacityKg, unit: 'kg', format: (v) => fmt(v), limitLabel: `${fmt(mission.capacityKg)} kg capacity` }),
     meter({ label: 'Budget', value: totals.cost, limit: mission.budgetMusd, format: (v) => fmtMusd(Math.round(v * 10) / 10), limitLabel: `${fmtMusd(mission.budgetMusd)} budget` }),
   );
+  return meters;
+}
 
-  const sorted = [...checks].sort((a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity]);
-  card.body.append(verdict, meters, el('hr', 'rule'), checklist(sorted));
+const signedW = (v) => `${v < 0 ? '−' : '+'}${fmt(Math.abs(v))} W`;
+
+/** Power and data plan of a complete build as definition rows (warnings use the same limits as the checks). */
+export function powerDataSummary(totals, mission) {
+  const imaging = totals.loads.base + totals.loads.imaging;
+  const downlink = totals.loads.base + totals.loads.downlink;
+  const power = specList([
+    { label: 'Sunlit power', value: `${fmt(totals.sunlitPowerW)} W` },
+    { label: 'Draw while imaging', value: `${fmt(imaging)} W`, tone: imaging > totals.sunlitPowerW ? 'warn' : 'good' },
+    { label: 'Draw while downlinking', value: `${fmt(downlink)} W`, tone: downlink > totals.sunlitPowerW ? 'warn' : 'good' },
+    { label: 'Average balance per orbit', value: signedW(Math.round(totals.orbitAvgBalanceW)), tone: totals.orbitAvgBalanceW < 0 ? 'warn' : 'good' },
+    { label: 'Eclipse reserve', value: `${fmt(totals.batteryWh)} Wh of ${fmt(totals.eclipseNeedWh)} Wh needed`, tone: totals.batteryWh < totals.eclipseNeedWh ? 'warn' : 'good' },
+  ]);
+  const data = specList([
+    { label: 'Memory on board', value: `${fmt(totals.storageMB)} MB`, tone: totals.storageMB < totals.imageryPerOrbitMB ? 'warn' : 'good' },
+    { label: 'Imagery per orbit', value: `${fmt(totals.imageryPerOrbitMB)} MB` },
+    { label: 'Most that can be collected', value: `${fmt(totals.maxImageryMB)} MB`, tone: totals.maxImageryMB < mission.goalMB ? 'warn' : 'good' },
+    { label: 'Most that can be sent', value: `${fmt(totals.maxDownlinkMB)} MB`, tone: totals.maxDownlinkMB < mission.goalMB ? 'warn' : 'good' },
+    { label: 'Goal', value: `${fmt(mission.goalMB)} MB` },
+  ]);
+  const wrap = el('div', 'readiness__summary');
+  wrap.append(microLabel('Power', 'label--quiet'), power, microLabel('Data', 'label--quiet'), data);
+  return wrap;
+}
+
+/** Build sheet rows for a payload: the part in each slot, then launch mass and cost against the limits. */
+export function payloadLines(assembly, result, mission) {
+  const lines = CATEGORIES.map((c) => {
+    const part = getPart(assembly?.[c]);
+    return { label: CATEGORY_LABELS[c], value: part ? partTitle(part) : 'Not installed', tone: part ? undefined : 'bad' };
+  });
+  const { mass, cost } = result.totals;
+  lines.push(
+    { label: 'Launch mass', value: `${fmt(mass)} kg of ${fmt(mission.capacityKg)} kg`, tone: mass > mission.capacityKg ? 'bad' : 'good' },
+    { label: 'Cost', value: `${fmtMusd(Math.round(cost * 10) / 10)} of ${fmtMusd(mission.budgetMusd)}`, tone: cost > mission.budgetMusd ? 'bad' : 'good' },
+  );
+  return specList(lines);
+}
+
+/** Checks ordered blockers, warnings, then the passed ones. */
+export const sortChecks = (checks) => [...checks].sort((a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity]);
+
+/** Readiness check document for an evaluateAssembly() result. */
+export function readinessCheck(result, mission, { onBack = null, onIntegrate = null } = {}) {
+  const card = documentCard({
+    code: 'FL-DOC-003', index: '03 / 05', label: 'Pre-launch', title: 'Readiness Check', marks: true, className: 'readiness',
+  });
+  card.body.append(verdictBanner(result), limitMeters(result.totals, mission), el('hr', 'rule'), checklist(sortChecks(result.checks)));
 
   const actions = el('div', 'btn-row doc__actions');
   const integrate = button('Integrate payload', 'primary', onIntegrate, { icon: 'rocket' });
-  integrate.disabled = !canIntegrate;
+  integrate.disabled = !result.canIntegrate;
   actions.append(button('Back to stand', 'ghost', onBack), integrate);
   card.body.append(actions);
   return card;
