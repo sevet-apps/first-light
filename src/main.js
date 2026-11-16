@@ -12,18 +12,19 @@ import { installDebug } from './core/debug.js';
 import title from './scenes/title.js';
 import intro from './scenes/intro.js';
 import hangar from './scenes/hangar/index.js';
-import launch from './scenes/launch.js';
-import orbit from './scenes/orbit.js';
+import launch from './scenes/launch/index.js';
+import orbit from './scenes/orbit/index.js';
 import debrief from './scenes/debrief.js';
 
 const SCENES = [title, intro, hangar, launch, orbit, debrief];
 
-// URL params: ?scene=<id> &debug=1 &selftest=1|assembly (hangar) &warp=<n> &assembly=<preset> &integrated=1 (hangar, after integration) &menu=pause|settings (test aid)
+// URL params: ?scene=<id> &debug=1 &selftest=1|assembly (hangar) &warp=<n> &assembly=<preset> &guide=0 (orbit: skip the first-time card) &integrated=1 (hangar, after integration) &menu=pause|settings (test aid)
 const params = new URLSearchParams(location.search);
 state.params.debug = params.get('debug') === '1';
 state.params.warp = Number(params.get('warp')) || 1;
 state.params.assembly = params.get('assembly');
 state.params.integrated = params.get('integrated') === '1';
+state.params.guide = params.get('guide') !== '0';
 state.params.selftest = params.get('selftest') === '1';
 state.params.assemblytest = params.get('selftest') === 'assembly';
 if (presets[state.params.assembly]) state.assembly = { ...presets[state.params.assembly] };
